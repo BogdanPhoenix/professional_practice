@@ -1,0 +1,47 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <property name = "hibernate.connection.url">jdbc:postgresql://localhost:5432/mydatabase?serverTimezone=UTC</property>
+        <property name = "hibernate.connection.username">bohdandb</property>
+        <property name = "hibernate.connection.password">root</property>
+        <property name = "hibernate.connection.driver_class">org.postgresql.Driver</property>
+
+        <property name = "hibernate.show_sql">true</property>
+        <property name = "hibernate.format_sql">true</property>
+        <property name = "hibernate.highlight_sql">true</property>
+        <property name = "hibernate.hbm2ddl.auto">update</property>
+
+        <!-- Table -->
+        <mapping class="org.university.business_logic.tables.orm.AccessRight"/>
+        <mapping class="org.university.business_logic.tables.orm.Authentication"/>
+        <mapping class="org.university.business_logic.tables.orm.BinFileProject"/>
+        <mapping class="org.university.business_logic.tables.orm.CheckList"/>
+        <mapping class="org.university.business_logic.tables.orm.CommandProject"/>
+        <mapping class="org.university.business_logic.tables.orm.CommentTask"/>
+        <mapping class="org.university.business_logic.tables.orm.Document"/>
+        <mapping class="org.university.business_logic.tables.orm.Employee"/>
+        <mapping class="org.university.business_logic.tables.orm.EmployeeAccessRight"/>
+        <mapping class="org.university.business_logic.tables.orm.ExecutionStatus"/>
+        <mapping class="org.university.business_logic.tables.orm.FileExtension"/>
+        <mapping class="org.university.business_logic.tables.orm.HistoryChange"/>
+        <mapping class="org.university.business_logic.tables.orm.Position"/>
+        <mapping class="org.university.business_logic.tables.orm.PriorityTask"/>
+        <mapping class="org.university.business_logic.tables.orm.Project"/>
+        <mapping class="org.university.business_logic.tables.orm.Sprint"/>
+        <mapping class="org.university.business_logic.tables.orm.StateTesting"/>
+        <mapping class="org.university.business_logic.tables.orm.Task"/>
+        <mapping class="org.university.business_logic.tables.orm.TaskTesting"/>
+        <mapping class="org.university.business_logic.tables.orm.TypeChange"/>
+        <mapping class="org.university.business_logic.tables.orm.TypeComplexity"/>
+
+        <!-- View -->
+        <mapping class="org.university.business_logic.tables.orm.view.FullProjectInfo"/>
+        <mapping class="org.university.business_logic.tables.orm.view.FullSprintInfo"/>
+        <mapping class="org.university.business_logic.tables.orm.view.FullTaskInfo"/>
+        <mapping class="org.university.business_logic.tables.orm.view.FullCheckListInfo"/>
+        <mapping class="org.university.business_logic.tables.orm.view.FullTaskTestingInfo"/>
+    </session-factory>
+</hibernate-configuration>
