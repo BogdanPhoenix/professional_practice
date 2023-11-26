@@ -1,11 +1,10 @@
 package org.university;
 
-import org.university.business_logic.tables.logic.util.HibernateUtil;
 import org.university.ui.interfaces.window.FinalWindow;
 import org.university.ui.interfaces.window.builder.Builder;
+import org.university.ui.realization.panel_interaction.logic.HibernateUtil;
 import org.university.ui.realization.window.builder.Direction;
 import org.university.ui.realization.window.builder.WindowBuilder;
-import org.university.ui.realization.window.builder.WindowProgram;
 
 import javax.swing.*;
 
@@ -20,8 +19,7 @@ public class App
 
         direction.createSimpleWindow(builderWindow);
 
-        WindowProgram window = ((FinalWindow<WindowProgram>)builderWindow).getResult();
-        JFrame frame = window.getFrame();
+        JFrame frame =  ((FinalWindow<JFrame>)builderWindow).getResult();
         frame.setVisible(true);
     }
 }

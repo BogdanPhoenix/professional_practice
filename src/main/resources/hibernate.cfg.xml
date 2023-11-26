@@ -15,33 +15,33 @@
         <property name = "hibernate.hbm2ddl.auto">update</property>
 
         <!-- Table -->
-        <mapping class="org.university.business_logic.tables.orm.AccessRight"/>
-        <mapping class="org.university.business_logic.tables.orm.Authentication"/>
-        <mapping class="org.university.business_logic.tables.orm.BinFileProject"/>
-        <mapping class="org.university.business_logic.tables.orm.CheckList"/>
-        <mapping class="org.university.business_logic.tables.orm.CommandProject"/>
-        <mapping class="org.university.business_logic.tables.orm.CommentTask"/>
-        <mapping class="org.university.business_logic.tables.orm.Document"/>
-        <mapping class="org.university.business_logic.tables.orm.Employee"/>
-        <mapping class="org.university.business_logic.tables.orm.EmployeeAccessRight"/>
-        <mapping class="org.university.business_logic.tables.orm.ExecutionStatus"/>
-        <mapping class="org.university.business_logic.tables.orm.FileExtension"/>
-        <mapping class="org.university.business_logic.tables.orm.HistoryChange"/>
-        <mapping class="org.university.business_logic.tables.orm.Position"/>
-        <mapping class="org.university.business_logic.tables.orm.PriorityTask"/>
-        <mapping class="org.university.business_logic.tables.orm.Project"/>
-        <mapping class="org.university.business_logic.tables.orm.Sprint"/>
-        <mapping class="org.university.business_logic.tables.orm.StateTesting"/>
-        <mapping class="org.university.business_logic.tables.orm.Task"/>
-        <mapping class="org.university.business_logic.tables.orm.TaskTesting"/>
-        <mapping class="org.university.business_logic.tables.orm.TypeChange"/>
-        <mapping class="org.university.business_logic.tables.orm.TypeComplexity"/>
+        <mapping class="org.university.business_logic.tables.AccessRight"/>
+        <mapping class="org.university.business_logic.tables.Authentication"/>
+        <mapping class="org.university.business_logic.tables.BinFileProject"/>
+        <mapping class="org.university.business_logic.tables.CheckList"/>
+        <mapping class="org.university.business_logic.tables.CommandProject"/>
+        <mapping class="org.university.business_logic.tables.CommentTask"/>
+        <mapping class="org.university.business_logic.tables.Document"/>
+        <mapping class="org.university.business_logic.tables.Employee"/>
+        <mapping class="org.university.business_logic.tables.EmployeeAccessRight"/>
+        <mapping class="org.university.business_logic.tables.ExecutionStatus"/>
+        <mapping class="org.university.business_logic.tables.FileExtension"/>
+        <mapping class="org.university.business_logic.tables.HistoryChange"/>
+        <mapping class="org.university.business_logic.tables.Position"/>
+        <mapping class="org.university.business_logic.tables.PriorityTask"/>
+        <mapping class="org.university.business_logic.tables.Project"/>
+        <mapping class="org.university.business_logic.tables.Sprint"/>
+        <mapping class="org.university.business_logic.tables.StateTesting"/>
+        <mapping class="org.university.business_logic.tables.Task"/>
+        <mapping class="org.university.business_logic.tables.TaskTesting"/>
+        <mapping class="org.university.business_logic.tables.TypeChange"/>
+        <mapping class="org.university.business_logic.tables.TypeComplexity"/>
 
         <!-- View -->
-        <mapping class="org.university.business_logic.tables.orm.view.FullProjectInfo"/>
-        <mapping class="org.university.business_logic.tables.orm.view.FullSprintInfo"/>
-        <mapping class="org.university.business_logic.tables.orm.view.FullTaskInfo"/>
-        <mapping class="org.university.business_logic.tables.orm.view.FullCheckListInfo"/>
-        <mapping class="org.university.business_logic.tables.orm.view.FullTaskTestingInfo"/>
+        <mapping class="org.university.business_logic.tables.view.FullProjectInfo"/>
+        <mapping class="org.university.business_logic.tables.view.FullSprintInfo"/>
+        <mapping class="org.university.business_logic.tables.view.FullTaskInfo"/>
+        <mapping class="org.university.business_logic.tables.view.FullCheckListInfo"/>
+        <mapping class="org.university.business_logic.tables.view.FullTaskTestingInfo"/>
     </session-factory>
 </hibernate-configuration>

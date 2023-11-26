@@ -5,16 +5,21 @@ import lombok.Getter;
 import javax.swing.*;
 import java.awt.*;
 
-@Getter
 public class WindowProgram {
-    private final JFrame frame;
+    @Getter
+    private static JFrame frame;
 
-    public WindowProgram(String title, Dimension windowSize, JMenuBar menuBar, JPanel panelInteraction) {
-        frame = new JFrame(title);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setJMenuBar(menuBar);
-        frame.add(panelInteraction);
+    private WindowProgram() {}
 
-        frame.setSize(windowSize);
+    public static JFrame createFrame(String title, Dimension windowSize, JMenuBar menuBar, JPanel panelInteraction) {
+        if(frame == null) {
+            frame = new JFrame(title);
+            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+            frame.setJMenuBar(menuBar);
+            frame.setContentPane(panelInteraction);
+            frame.setSize(windowSize);
+        }
+
+        return frame;
     }
 }

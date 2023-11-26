@@ -6,7 +6,7 @@ import org.university.ui.interfaces.window.FinalWindow;
 import javax.swing.*;
 import java.awt.*;
 
-public class WindowBuilder implements Builder, FinalWindow<WindowProgram> {
+public class WindowBuilder implements Builder, FinalWindow<JFrame> {
     private String title;
     private Dimension size;
     private JMenuBar menuBar;
@@ -33,7 +33,7 @@ public class WindowBuilder implements Builder, FinalWindow<WindowProgram> {
     }
 
     @Override
-    public WindowProgram getResult() {
-        return new WindowProgram(title, size, menuBar, panelInteraction);
+    public JFrame getResult() {
+        return WindowProgram.createFrame(title, size, menuBar, panelInteraction);
     }
 }

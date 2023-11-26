@@ -1,9 +1,10 @@
 package org.university.business_logic.enumuration;
 
 import lombok.Getter;
-import org.university.business_logic.tables.logic.util.*;
-import org.university.business_logic.tables.logic.interfaces.TableModelView;
-import org.university.business_logic.tables.logic.util.view.*;
+import org.jetbrains.annotations.NotNull;
+import org.university.ui.interfaces.panel_interaction.logic.TableModelView;
+import org.university.ui.realization.panel_interaction.logic.*;
+import org.university.ui.realization.panel_interaction.logic.view.*;
 
 import java.util.function.Supplier;
 
@@ -31,14 +32,14 @@ public enum Table {
     TYPE_CHANGE(TypeChangeUtil::new),
     TYPE_COMPLEXITY(TypeComplexityUtil::new);
 
-    private final TableModelView tableModel;
+    private final TableModelView<?> tableUtil;
 
-    Table(Supplier<TableModelView> tableModel) {
-        this.tableModel = tableModel.get();
+    Table(@NotNull Supplier<TableModelView<?>> tableUtil) {
+        this.tableUtil = tableUtil.get();
     }
 
     @Override
     public String toString() {
-        return tableModel.getNameTable();
+        return tableUtil.getNameTable();
     }
 }
