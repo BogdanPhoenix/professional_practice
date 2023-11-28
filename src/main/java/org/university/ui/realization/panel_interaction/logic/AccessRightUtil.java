@@ -1,8 +1,10 @@
 package org.university.ui.realization.panel_interaction.logic;
 
 import org.jetbrains.annotations.NotNull;
+import org.university.business_logic.enumuration.SearchOperation;
 import org.university.ui.interfaces.panel_interaction.logic.TableModelView;
 import org.university.business_logic.tables.AccessRight;
+import org.university.ui.realization.panel_interaction.SearchCriteria;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -22,8 +24,8 @@ public class AccessRightUtil extends TableModelView<AccessRight> {
     }
 
     @Override
-    public void createModel(DefaultTableModel tableModel) {
-        super.createModel(tableModel);
+    public void createViewModel(@NotNull DefaultTableModel tableModel) {
+        super.createViewModel(tableModel);
 
         var accessRights = selectAll();
         addRows(tableModel, accessRights);
@@ -36,11 +38,26 @@ public class AccessRightUtil extends TableModelView<AccessRight> {
 
     @Override
     public JPanel panelInsertData() {
-        return createTextFieldInputPanel(NAME_RIGHT);
+        return createTextFieldInputPanel("Право доступу", NAME_RIGHT);
     }
 
     @Override
     public ActionListener command() {
-        return e -> {};
+        return e -> {
+            String value = valueFromTextField(NAME_RIGHT);
+
+            var right = AccessRight.builder()
+                    .nameRight(value)
+                    .currentData(true)
+                    .build();
+
+            var search = new SearchCriteria(NAME_RIGHT, right.getNameRight(), SearchOperation.EQUAL);
+
+            if(saveToTable(right, search).isEmpty()){
+                return;
+            }
+
+            ((JTextField)components.get(NAME_RIGHT)).setText("");
+        };
     }
 }

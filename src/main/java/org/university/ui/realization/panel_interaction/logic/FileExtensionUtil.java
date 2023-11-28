@@ -1,8 +1,10 @@
 package org.university.ui.realization.panel_interaction.logic;
 
 import org.jetbrains.annotations.NotNull;
+import org.university.business_logic.enumuration.SearchOperation;
 import org.university.ui.interfaces.panel_interaction.logic.TableModelView;
 import org.university.business_logic.tables.FileExtension;
+import org.university.ui.realization.panel_interaction.SearchCriteria;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -23,8 +25,8 @@ public class FileExtensionUtil extends TableModelView<FileExtension> {
     }
 
     @Override
-    public void createModel(DefaultTableModel tableModel) {
-        super.createModel(tableModel);
+    public void createViewModel(@NotNull DefaultTableModel tableModel) {
+        super.createViewModel(tableModel);
 
         var fileExtensions = selectAll();
         addRows(tableModel, fileExtensions);
@@ -37,11 +39,26 @@ public class FileExtensionUtil extends TableModelView<FileExtension> {
 
     @Override
     public JPanel panelInsertData() {
-        return createTextFieldInputPanel(NAME_EXTENSION);
+        return createTextFieldInputPanel("Розширення файлу", NAME_EXTENSION);
     }
 
     @Override
     public ActionListener command() {
-        return e -> {};
+        return e -> {
+            String value = valueFromTextField(NAME_EXTENSION);
+
+            var extension = FileExtension.builder()
+                    .nameExtension(value)
+                    .currentData(true)
+                    .build();
+
+            var search = new SearchCriteria(NAME_EXTENSION, extension.getNameExtension(), SearchOperation.EQUAL);
+
+            if (saveToTable(extension, search).isEmpty()) {
+                return;
+            }
+
+            ((JTextField)components.get(NAME_EXTENSION)).setText("");
+        };
     }
 }

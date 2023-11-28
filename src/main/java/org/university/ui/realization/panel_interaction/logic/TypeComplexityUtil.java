@@ -16,8 +16,8 @@ public class TypeComplexityUtil extends TableModelView<TypeComplexity> {
     }
 
     @Override
-    public void createModel(DefaultTableModel tableModel) {
-        super.createModel(tableModel);
+    public void createViewModel(@NotNull DefaultTableModel tableModel) {
+        super.createViewModel(tableModel);
 
         var typeComplexities = selectAll();
         addRows(tableModel, typeComplexities);

@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 @Getter
 public enum Table {
     ACCESS_RIGHT(AccessRightUtil::new),
-    AUTHENTICATION(AuthenticationUtil::new),
     BIN_FILE_PROJECT(BinFileProjectUtil::new),
     FULL_CHECK_LIST_INFO(FullCheckListInfoUtil::new),
     COMMAND_PROJECT(CommandProjectUtil::new),

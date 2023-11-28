@@ -1,8 +1,10 @@
 package org.university.ui.realization.panel_interaction.logic;
 
 import org.jetbrains.annotations.NotNull;
+import org.university.business_logic.enumuration.SearchOperation;
 import org.university.ui.interfaces.panel_interaction.logic.TableModelView;
 import org.university.business_logic.tables.Position;
+import org.university.ui.realization.panel_interaction.SearchCriteria;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -23,8 +25,8 @@ public class PositionUtil extends TableModelView<Position> {
     }
 
     @Override
-    public void createModel(DefaultTableModel tableModel) {
-        super.createModel(tableModel);
+    public void createViewModel(@NotNull DefaultTableModel tableModel) {
+        super.createViewModel(tableModel);
 
         var executionStatuses = selectAll();
         addRows(tableModel, executionStatuses);
@@ -37,11 +39,26 @@ public class PositionUtil extends TableModelView<Position> {
 
     @Override
     public JPanel panelInsertData() {
-        return createTextFieldInputPanel(NAME_POSITION);
+        return createTextFieldInputPanel("Посада", NAME_POSITION);
     }
 
     @Override
     public ActionListener command() {
-        return e -> {};
+        return e -> {
+            String value = valueFromTextField(NAME_POSITION);
+
+            var position = Position.builder()
+                    .namePosition(value)
+                    .currentData(true)
+                    .build();
+
+            var search = new SearchCriteria(NAME_POSITION, position.getNamePosition(), SearchOperation.EQUAL);
+
+            if (saveToTable(position, search).isEmpty()) {
+                return;
+            }
+
+            ((JTextField)components.get(NAME_POSITION)).setText("");
+        };
     }
 }

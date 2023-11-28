@@ -26,7 +26,7 @@ public class Position implements TableID {
     private String namePosition;
 
     @Column(name = "current_data")
-    private boolean currentData = true;
+    private boolean currentData;
 
     @OneToMany(mappedBy = "position", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Employee> employees;

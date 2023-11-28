@@ -51,7 +51,7 @@ public class BinFileProject implements TableID {
     private Timestamp dateTimeDown;
 
     @Column(name = "current_data")
-    private boolean currentData = true;
+    private boolean currentData;
 
     @Override
     public Long getId() {

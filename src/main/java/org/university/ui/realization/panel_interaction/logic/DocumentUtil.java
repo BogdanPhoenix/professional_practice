@@ -16,8 +16,8 @@ public class DocumentUtil extends TableModelView<Document> {
     }
 
     @Override
-    public void createModel(DefaultTableModel tableModel) {
-        super.createModel(tableModel);
+    public void createViewModel(@NotNull DefaultTableModel tableModel) {
+        super.createViewModel(tableModel);
 
         var documents = selectAll();
         addRows(tableModel, documents);

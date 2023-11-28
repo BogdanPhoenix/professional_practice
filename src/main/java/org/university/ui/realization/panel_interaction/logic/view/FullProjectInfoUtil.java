@@ -17,8 +17,8 @@ public class FullProjectInfoUtil extends TableModelView<FullProjectInfo> {
     }
 
     @Override
-    public void createModel(DefaultTableModel tableModel) {
-        super.createModel(tableModel);
+    public void createViewModel(@NotNull DefaultTableModel tableModel) {
+        super.createViewModel(tableModel);
 
         var fullProjectInfos = selectAll();
         addRows(tableModel, fullProjectInfos);

@@ -1,5 +1,6 @@
 package org.university.ui.realization.panel_interaction.logic.view;
 
+import org.jetbrains.annotations.NotNull;
 import org.university.ui.interfaces.panel_interaction.logic.TableModelView;
 import org.university.business_logic.tables.view.FullTaskTestingInfo;
 
@@ -15,15 +16,15 @@ public class FullTaskTestingInfoUtil extends TableModelView<FullTaskTestingInfo>
     }
 
     @Override
-    public void createModel(DefaultTableModel tableModel) {
-        super.createModel(tableModel);
+    public void createViewModel(@NotNull DefaultTableModel tableModel) {
+        super.createViewModel(tableModel);
 
         var fullTaskTestingInfos = selectAll();
         addRows(tableModel, fullTaskTestingInfos);
     }
 
     @Override
-    protected Object[] createAttribute(FullTaskTestingInfo value) {
+    protected Object[] createAttribute(@NotNull FullTaskTestingInfo value) {
         return new Object[]{
                 value.getNameProject(),
                 value.getNameSprint(),

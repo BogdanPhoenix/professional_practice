@@ -26,7 +26,7 @@ public class PriorityTask implements TableID {
     private String namePriority;
 
     @Column(name = "current_data")
-    private boolean currentData = true;
+    private boolean currentData;
 
     @OneToMany(mappedBy = "priority", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Task> tasks;

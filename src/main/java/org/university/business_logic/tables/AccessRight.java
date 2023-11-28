@@ -26,7 +26,7 @@ public class AccessRight implements TableID {
     private String nameRight;
 
     @Column(name = "current_data")
-    private boolean currentData = true;
+    private boolean currentData;
 
     @OneToMany(mappedBy = "accessRight", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<EmployeeAccessRight> employeeAccessRights;

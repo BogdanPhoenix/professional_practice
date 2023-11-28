@@ -1,7 +1,7 @@
-package org.university.ui.realization.panel_interaction.select;
+package org.university.ui.realization.panel_interaction.control_panel;
 
 import org.jetbrains.annotations.NotNull;
-import org.university.ControlPanel;
+import org.university.ui.interfaces.panel_interaction.control_panel.ControlPanel;
 import org.university.ui.interfaces.panel_interaction.logic.TableModelView;
 
 import javax.swing.*;

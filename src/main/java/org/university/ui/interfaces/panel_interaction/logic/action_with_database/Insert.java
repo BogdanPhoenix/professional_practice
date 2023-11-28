@@ -13,12 +13,6 @@ import java.util.Optional;
 public interface Insert<T> {
     Class<T> resolveEntityClass();
 
-    default void saveAll(@NotNull List<T> entities){
-        for(T entity : entities){
-            save(entity);
-        }
-    }
-
     default Optional<T> save(T entity){
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         Transaction transaction = null;
@@ -34,7 +28,7 @@ public interface Insert<T> {
                 transaction.rollback();
             }
 
-            throw new IllegalArgumentException(String.format("An error occurred while adding an %s object.", entity));
+            throw new IllegalArgumentException(String.format("Виникла помилка при додаванні об'єкта %s.", entity));
         }
     }
 }

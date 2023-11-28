@@ -30,7 +30,7 @@ public class FileExtension implements TableID {
     private String nameExtension;
 
     @Column(name = "current_data")
-    private boolean currentData = true;
+    private boolean currentData;
 
     @OneToMany(mappedBy = "fileExtension", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<BinFileProject> binFileProjects;

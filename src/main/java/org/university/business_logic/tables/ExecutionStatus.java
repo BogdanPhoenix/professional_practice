@@ -26,7 +26,7 @@ public class ExecutionStatus implements TableID {
     private String nameExecution;
 
     @Column(name = "current_data")
-    private boolean currentData = true;
+    private boolean currentData;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

@@ -16,8 +16,8 @@ public class EmployeeAccessRightUtil extends TableModelView<EmployeeAccessRight>
     }
 
     @Override
-    public void createModel(DefaultTableModel tableModel) {
-        super.createModel(tableModel);
+    public void createViewModel(@NotNull DefaultTableModel tableModel) {
+        super.createViewModel(tableModel);
 
         var employeeAccessRights = selectAll();
         addRows(tableModel, employeeAccessRights);

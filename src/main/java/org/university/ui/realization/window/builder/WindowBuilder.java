@@ -9,6 +9,7 @@ import java.awt.*;
 public class WindowBuilder implements Builder, FinalWindow<JFrame> {
     private String title;
     private Dimension size;
+    private Dimension minSize;
     private JMenuBar menuBar;
     private JPanel panelInteraction;
 
@@ -23,6 +24,11 @@ public class WindowBuilder implements Builder, FinalWindow<JFrame> {
     }
 
     @Override
+    public void setMinSize(Dimension minSize) {
+        this.minSize = minSize;
+    }
+
+    @Override
     public void setMenuBar(JMenuBar menu) {
         this.menuBar = menu;
     }
@@ -34,6 +40,6 @@ public class WindowBuilder implements Builder, FinalWindow<JFrame> {
 
     @Override
     public JFrame getResult() {
-        return WindowProgram.createFrame(title, size, menuBar, panelInteraction);
+        return WindowProgram.createFrame(title, size, minSize, menuBar, panelInteraction);
     }
 }

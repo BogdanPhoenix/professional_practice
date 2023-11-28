@@ -30,7 +30,7 @@ public class TypeChange implements TableID {
     private String nameTypeChange;
 
     @Column(name = "current_data")
-    private boolean currentData = true;
+    private boolean currentData;
 
     @OneToMany(mappedBy = "typeChange", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<HistoryChange> historyChanges;

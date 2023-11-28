@@ -1,7 +1,8 @@
-package org.university.ui.realization.panel_interaction.update_insert;
+package org.university.ui.realization.panel_interaction.control_panel;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.university.ControlPanel;
+import org.university.ui.interfaces.panel_interaction.control_panel.ControlPanel;
 import org.university.ui.interfaces.panel_interaction.logic.TableModelView;
 
 import javax.swing.*;
@@ -9,7 +10,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
-public class InsertPanelImpl implements ControlPanel {
+public class InsertPanel implements ControlPanel {
     private static final Dimension SIZE_PANEL_BUTTON = new Dimension(0, 50);
     private static final Insets GRID_CONTAINERS_BORDER = new Insets(5, 0, 5, 0);
     private static final Dimension MIN_SIZE_CONTROL_PANEL = new Dimension(0, 150);
@@ -19,15 +20,16 @@ public class InsertPanelImpl implements ControlPanel {
 
     private ActionListener command;
     private TableModelView<?> tableUtil;
+    private JButton button;
 
-    private InsertPanelImpl(){
+    private InsertPanel(){
         GRID_BAG_CONSTRAINTS.fill = GridBagConstraints.BOTH;
         insertPanel = new JPanel();
     }
 
     public static ControlPanel getInstance(){
         if(instance == null){
-            instance = new InsertPanelImpl();
+            instance = new InsertPanel();
         }
 
         return instance;
@@ -35,12 +37,13 @@ public class InsertPanelImpl implements ControlPanel {
 
     @Override
     public void repaintControlPanel(@NotNull JPanel controlPanel) {
-        System.out.println("Insert panel");
         if(!controlPanel.isVisible()){
             createControlPanel(controlPanel);
         }
 
+        button.removeActionListener(command);
         command = tableUtil.command();
+        button.addActionListener(command);
 
         controlPanel.remove(insertPanel);
         insertPanel = tableUtil.panelInsertData();
@@ -104,13 +107,18 @@ public class InsertPanelImpl implements ControlPanel {
         panel.setMaximumSize(SIZE_PANEL_BUTTON);
         panel.setMinimumSize(SIZE_PANEL_BUTTON);
 
-        JButton button = new JButton("Додати");
-        button.addActionListener(command);
+        button = new JButton("Додати");
+        button.addActionListener(updateTable());
 
         panel.add(button);
         panel.add(Box.createHorizontalGlue());
         panel.setBorder(new EmptyBorder(0, 10, 0, 10));
 
         return panel;
+    }
+
+    @Contract(pure = true)
+    private @NotNull ActionListener updateTable(){
+        return e -> tableUtil.repaint();
     }
 }

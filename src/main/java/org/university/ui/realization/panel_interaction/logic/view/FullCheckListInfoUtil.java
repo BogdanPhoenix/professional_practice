@@ -17,8 +17,8 @@ public class FullCheckListInfoUtil extends TableModelView<FullCheckListInfo> {
     }
 
     @Override
-    public void createModel(DefaultTableModel tableModel) {
-        super.createModel(tableModel);
+    public void createViewModel(@NotNull DefaultTableModel tableModel) {
+        super.createViewModel(tableModel);
 
         var fullCheckListInfos = selectAll();
         addRows(tableModel, fullCheckListInfos);

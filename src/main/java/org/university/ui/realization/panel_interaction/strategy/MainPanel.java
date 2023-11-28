@@ -1,13 +1,12 @@
-package org.university.ui.interfaces.panel_interaction.strategy;
+package org.university.ui.realization.panel_interaction.strategy;
 
-import lombok.Getter;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.university.ControlPanel;
-import org.university.StrategyControlPanel;
 import org.university.business_logic.enumuration.Table;
+import org.university.ui.interfaces.panel_interaction.control_panel.ControlPanel;
 import org.university.ui.interfaces.panel_interaction.logic.TableModelView;
-import org.university.ui.realization.panel_interaction.select.ViewPanel;
+import org.university.ui.interfaces.panel_interaction.strategy.StrategyControlPanel;
+import org.university.ui.realization.panel_interaction.control_panel.ViewPanel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

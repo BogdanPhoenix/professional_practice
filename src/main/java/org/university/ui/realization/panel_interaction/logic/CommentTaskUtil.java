@@ -16,8 +16,8 @@ public class CommentTaskUtil extends TableModelView<CommentTask> {
     }
 
     @Override
-    public void createModel(DefaultTableModel tableModel) {
-        super.createModel(tableModel);
+    public void createViewModel(@NotNull DefaultTableModel tableModel) {
+        super.createViewModel(tableModel);
 
         var commentTasks = selectAll();
         addRows(tableModel, commentTasks);

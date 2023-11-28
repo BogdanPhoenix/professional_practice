@@ -8,6 +8,7 @@ import jakarta.persistence.criteria.Root;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.jetbrains.annotations.NotNull;
+import org.university.business_logic.enumuration.SearchOperation;
 import org.university.ui.realization.panel_interaction.SearchCriteria;
 import org.university.ui.realization.panel_interaction.logic.HibernateUtil;
 
@@ -19,15 +20,7 @@ import java.util.Optional;
 public interface Select<T> {
     Class<T> resolveEntityClass();
 
-    default Optional<T> selectOne(SearchCriteria searchCriteriaList){
-        return selectAll(List.of(searchCriteriaList)).get(0);
-    }
-
-    default List<Optional<T>> selectAll(){
-        return selectAll(new ArrayList<>());
-    }
-
-    default List<Optional<T>> selectAll(List<SearchCriteria> searchCriteriaList) {
+    default List<Optional<T>> selectAll(SearchCriteria @NotNull ... searchCriteria) {
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 
         try (Session session = sessionFactory.openSession()) {
@@ -38,14 +31,19 @@ public interface Select<T> {
             Root<T> rootEntry = criteriaQuery.from(entityClass);
             CriteriaQuery<T> all = criteriaQuery.select(rootEntry);
 
-            if (searchCriteriaList != null && !searchCriteriaList.isEmpty()) {
-                Predicate[] predicates = new Predicate[searchCriteriaList.size()];
+            Predicate[] predicates = new Predicate[searchCriteria.length + 1];
+
+            if (searchCriteria.length != 0) {
                 int index = 0;
-                for (var search : searchCriteriaList) {
+                for (var search : searchCriteria) {
                     predicates[index++] = buildPredicate(criteriaBuilder, rootEntry, search);
                 }
-                criteriaQuery.where(predicates);
             }
+
+            SearchCriteria searchCurrentData = new SearchCriteria("currentData", true, SearchOperation.EQUAL);
+
+            predicates[predicates.length - 1] = buildPredicate(criteriaBuilder, rootEntry, searchCurrentData);
+            criteriaQuery.where(predicates);
 
             TypedQuery<T> allQuery = session.createQuery(all);
             return allQuery

@@ -16,8 +16,8 @@ public class FullSprintInfoUtil extends TableModelView<FullSprintInfo> {
     }
 
     @Override
-    public void createModel(DefaultTableModel tableModel) {
-        super.createModel(tableModel);
+    public void createViewModel(@NotNull DefaultTableModel tableModel) {
+        super.createViewModel(tableModel);
 
         var fullSprintInfos = selectAll();
         addRows(tableModel, fullSprintInfos);

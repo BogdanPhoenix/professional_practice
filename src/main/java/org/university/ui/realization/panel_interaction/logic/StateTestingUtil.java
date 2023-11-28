@@ -1,8 +1,10 @@
 package org.university.ui.realization.panel_interaction.logic;
 
 import org.jetbrains.annotations.NotNull;
+import org.university.business_logic.enumuration.SearchOperation;
 import org.university.ui.interfaces.panel_interaction.logic.TableModelView;
 import org.university.business_logic.tables.StateTesting;
+import org.university.ui.realization.panel_interaction.SearchCriteria;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -22,8 +24,8 @@ public class StateTestingUtil extends TableModelView<StateTesting> {
     }
 
     @Override
-    public void createModel(DefaultTableModel tableModel) {
-        super.createModel(tableModel);
+    public void createViewModel(@NotNull DefaultTableModel tableModel) {
+        super.createViewModel(tableModel);
 
         var stateTestings = selectAll();
         addRows(tableModel, stateTestings);
@@ -36,11 +38,26 @@ public class StateTestingUtil extends TableModelView<StateTesting> {
 
     @Override
     public JPanel panelInsertData() {
-        return createTextFieldInputPanel(TASK_TESTING);
+        return createTextFieldInputPanel("Стан тестування", TASK_TESTING);
     }
 
     @Override
     public ActionListener command() {
-        return e -> {};
+        return e -> {
+            String value = valueFromTextField(TASK_TESTING);
+
+            var state = StateTesting.builder()
+                    .nameState(value)
+                    .currentData(true)
+                    .build();
+
+            var search = new SearchCriteria(TASK_TESTING, state.getNameState(), SearchOperation.EQUAL);
+
+            if (saveToTable(state, search).isEmpty()) {
+                return;
+            }
+
+            ((JTextField)components.get(TASK_TESTING)).setText("");
+        };
     }
 }

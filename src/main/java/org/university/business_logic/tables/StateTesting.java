@@ -30,7 +30,7 @@ public class StateTesting implements TableID {
     private String nameState;
 
     @Column(name = "current_data")
-    private boolean currentData = true;
+    private boolean currentData;
 
     @OneToMany(mappedBy = "stateTesting", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TaskTesting> taskTestings;

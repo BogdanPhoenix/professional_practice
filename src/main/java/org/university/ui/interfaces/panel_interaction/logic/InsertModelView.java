@@ -3,7 +3,7 @@ package org.university.ui.interfaces.panel_interaction.logic;
 import javax.swing.*;
 import java.awt.event.ActionListener;
 
-public interface InsertAndUpdateModelView {
+public interface InsertModelView {
     JPanel panelInsertData();
     ActionListener command();
 }

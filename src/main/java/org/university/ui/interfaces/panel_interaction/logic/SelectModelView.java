@@ -6,11 +6,11 @@ import javax.swing.table.DefaultTableModel;
 
 @FunctionalInterface
 public interface SelectModelView {
-    void createModel(DefaultTableModel tableModel);
+    void createViewModel(@NotNull DefaultTableModel tableModel);
 
-    default void updateTableModel(DefaultTableModel tableModel){
+    default void updateTableModel(@NotNull DefaultTableModel tableModel){
         clearModel(tableModel);
-        createModel(tableModel);
+        createViewModel(tableModel);
     }
 
     private static void clearModel(@NotNull DefaultTableModel tableModel){

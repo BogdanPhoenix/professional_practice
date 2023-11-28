@@ -6,6 +6,7 @@ import java.awt.*;
 public interface Builder {
     void setTitle(String title);
     void setSize(Dimension size);
+    void setMinSize(Dimension minSize);
     void setMenuBar(JMenuBar menu);
     void setPanelInteraction(JPanel panel);
 }

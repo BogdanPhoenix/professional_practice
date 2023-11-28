@@ -2,17 +2,16 @@ package org.university.ui.realization.panel_interaction.logic;
 
 import org.jetbrains.annotations.NotNull;
 import org.university.ui.interfaces.panel_interaction.logic.TableModelView;
-import org.university.ui.interfaces.panel_interaction.logic.action_with_database.Insert;
 import org.university.business_logic.tables.ExecutionStatus;
 import org.university.ui.realization.panel_interaction.SearchCriteria;
-import org.university.ui.realization.panel_interaction.SearchOperation;
+import org.university.business_logic.enumuration.SearchOperation;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionListener;
 import java.util.List;
 
-public class ExecutionStatusUtil extends TableModelView<ExecutionStatus> implements Insert<ExecutionStatus> {
+public class ExecutionStatusUtil extends TableModelView<ExecutionStatus> {
     private static final String NAME_EXECUTION = "nameExecution";
 
     public ExecutionStatusUtil(){
@@ -26,8 +25,8 @@ public class ExecutionStatusUtil extends TableModelView<ExecutionStatus> impleme
     }
 
     @Override
-    public void createModel(DefaultTableModel tableModel) {
-        super.createModel(tableModel);
+    public void createViewModel(@NotNull DefaultTableModel tableModel) {
+        super.createViewModel(tableModel);
 
         var executionStatuses = selectAll();
         addRows(tableModel, executionStatuses);
@@ -40,7 +39,7 @@ public class ExecutionStatusUtil extends TableModelView<ExecutionStatus> impleme
 
     @Override
     public JPanel panelInsertData() {
-        return createTextFieldInputPanel(NAME_EXECUTION);
+        return createTextFieldInputPanel("Статус виконання", NAME_EXECUTION);
     }
 
     @Override
@@ -55,12 +54,11 @@ public class ExecutionStatusUtil extends TableModelView<ExecutionStatus> impleme
 
             var search = new SearchCriteria(NAME_EXECUTION, execution.getNameExecution(), SearchOperation.EQUAL);
 
-            if(isDuplicate(this, search)){
-                System.out.println("Duplicate execution");
+            if (saveToTable(execution, search).isEmpty()) {
                 return;
             }
 
-            save(execution);
+            ((JTextField)components.get(NAME_EXECUTION)).setText("");
         };
     }
 }

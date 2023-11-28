@@ -1,8 +1,10 @@
 package org.university.ui.realization.panel_interaction.logic;
 
 import org.jetbrains.annotations.NotNull;
+import org.university.business_logic.enumuration.SearchOperation;
 import org.university.ui.interfaces.panel_interaction.logic.TableModelView;
 import org.university.business_logic.tables.PriorityTask;
+import org.university.ui.realization.panel_interaction.SearchCriteria;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -23,8 +25,8 @@ public class PriorityTaskUtil extends TableModelView<PriorityTask> {
     }
 
     @Override
-    public void createModel(DefaultTableModel tableModel) {
-        super.createModel(tableModel);
+    public void createViewModel(@NotNull DefaultTableModel tableModel) {
+        super.createViewModel(tableModel);
 
         var priorityTasks = selectAll();
         addRows(tableModel, priorityTasks);
@@ -37,11 +39,26 @@ public class PriorityTaskUtil extends TableModelView<PriorityTask> {
 
     @Override
     public JPanel panelInsertData() {
-        return createTextFieldInputPanel(NAME_PRIORITY);
+        return createTextFieldInputPanel("Пріоритет завдання", NAME_PRIORITY);
     }
 
     @Override
     public ActionListener command() {
-        return e -> {};
+        return e -> {
+            String value = valueFromTextField(NAME_PRIORITY);
+
+            var priority = PriorityTask.builder()
+                    .namePriority(value)
+                    .currentData(true)
+                    .build();
+
+            var search = new SearchCriteria(NAME_PRIORITY, priority.getNamePriority(), SearchOperation.EQUAL);
+
+            if (saveToTable(priority, search).isEmpty()) {
+                return;
+            }
+
+            ((JTextField)components.get(NAME_PRIORITY)).setText("");
+        };
     }
 }

@@ -46,7 +46,7 @@ public class Employee implements TableID {
     private String description;
 
     @Column(name = "current_data")
-    private boolean currentData = true;
+    private boolean currentData;
 
     @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
     private Authentication authentication;
@@ -89,5 +89,10 @@ public class Employee implements TableID {
     @Override
     public Long getId() {
         return indexEmployee;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s", firstName, nameUser);
     }
 }

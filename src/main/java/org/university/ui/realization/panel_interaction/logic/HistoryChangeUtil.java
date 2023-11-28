@@ -16,8 +16,8 @@ public class HistoryChangeUtil extends TableModelView<HistoryChange> {
     }
 
     @Override
-    public void createModel(DefaultTableModel tableModel) {
-        super.createModel(tableModel);
+    public void createViewModel(@NotNull DefaultTableModel tableModel) {
+        super.createViewModel(tableModel);
 
         var historyChanges = selectAll();
         addRows(tableModel, historyChanges);

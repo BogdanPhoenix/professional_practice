@@ -1,8 +1,10 @@
 package org.university.ui.realization.panel_interaction.logic;
 
 import org.jetbrains.annotations.NotNull;
+import org.university.business_logic.enumuration.SearchOperation;
 import org.university.ui.interfaces.panel_interaction.logic.TableModelView;
 import org.university.business_logic.tables.TypeChange;
+import org.university.ui.realization.panel_interaction.SearchCriteria;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -23,8 +25,8 @@ public class TypeChangeUtil extends TableModelView<TypeChange> {
     }
 
     @Override
-    public void createModel(DefaultTableModel tableModel) {
-        super.createModel(tableModel);
+    public void createViewModel(@NotNull DefaultTableModel tableModel) {
+        super.createViewModel(tableModel);
 
         var typeChanges = selectAll();
         addRows(tableModel, typeChanges);
@@ -37,11 +39,26 @@ public class TypeChangeUtil extends TableModelView<TypeChange> {
 
     @Override
     public JPanel panelInsertData() {
-        return createTextFieldInputPanel(NAME_TYPE_CHANGE);
+        return createTextFieldInputPanel("Тип зміни", NAME_TYPE_CHANGE);
     }
 
     @Override
     public ActionListener command() {
-        return e -> {};
+        return e -> {
+            String value = valueFromTextField(NAME_TYPE_CHANGE);
+
+            var change = TypeChange.builder()
+                    .nameTypeChange(value)
+                    .currentData(true)
+                    .build();
+
+            var search = new SearchCriteria(NAME_TYPE_CHANGE, change.getNameTypeChange(), SearchOperation.EQUAL);
+
+            if (saveToTable(change, search).isEmpty()) {
+                return;
+            }
+
+            ((JTextField)components.get(NAME_TYPE_CHANGE)).setText("");
+        };
     }
 }

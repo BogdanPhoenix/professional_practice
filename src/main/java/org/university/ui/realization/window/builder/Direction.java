@@ -13,6 +13,7 @@ public class Direction {
 
         builder.setTitle("Database");
         builder.setSize(new Dimension(900, 900));
+        builder.setMinSize(new Dimension(400, 400));
         builder.setMenuBar(factory.getMenuBar().createMenu());
         builder.setPanelInteraction(factory.getInteraction());
     }

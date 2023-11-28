@@ -16,8 +16,8 @@ public class CommandProjectUtil extends TableModelView<CommandProject> {
     }
 
     @Override
-    public void createModel(DefaultTableModel tableModel) {
-        super.createModel(tableModel);
+    public void createViewModel(@NotNull DefaultTableModel tableModel) {
+        super.createViewModel(tableModel);
 
         var projects = selectAll();
         addRows(tableModel, projects);

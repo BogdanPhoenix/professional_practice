@@ -1,4 +1,4 @@
-package org.university;
+package org.university.ui.interfaces.panel_interaction.control_panel;
 
 import org.jetbrains.annotations.NotNull;
 import org.university.ui.interfaces.panel_interaction.logic.TableModelView;

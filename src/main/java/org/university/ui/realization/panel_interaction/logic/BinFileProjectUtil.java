@@ -11,14 +11,22 @@ import java.awt.event.ActionListener;
 import java.util.List;
 
 public class BinFileProjectUtil extends TableModelView<BinFileProject> {
+    private static final String PROJECT = "";
+    private static final String FILE_EXTENSION = "";
+    private static final String PERFORMER = "";
+    private static final String NAME_FILE = "";
+    private static final String DESCRIPTION = "";
+    private static final String BIT_FILE = "";
+    private static final String DATE_DOWN = "";
     public BinFileProjectUtil(){
-        titleColumns = List.of("Проект", "Виконавець", "Розширення файлу", "Назва файлу", "Файл", "Дата завантаження", "Опис");
+        titleColumns = List.of("Проект", "Виконавець", "Розширення файлу", "Назва файлу",
+                "Файл", "Дата завантаження", "Опис");
         nameTable = "Бінарні файли";
     }
 
     @Override
-    public void createModel(DefaultTableModel tableModel) {
-        super.createModel(tableModel);
+    public void createViewModel(@NotNull DefaultTableModel tableModel) {
+        super.createViewModel(tableModel);
 
         var binFileProjects = selectAll();
         addRows(tableModel, binFileProjects);
@@ -33,6 +41,7 @@ public class BinFileProjectUtil extends TableModelView<BinFileProject> {
                 performer.getFirstName() + " " + performer.getNameUser(),
                 value.getFileExtension().getNameExtension(),
                 value.getNameFile(),
+                value.getBitFile(),
                 value.getDateTimeDown(),
                 value.getDescription()
         };
