@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="mydatabase@localhost" uuid="989ee012-ad82-498b-aaae-6eb09c069532">
+    <data-source source="LOCAL" name="professional_practice@localhost" uuid="f2bfb7e8-c982-4256-867b-0e84bc81b675">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/mydatabase</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5432/professional_practice</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="hibernate.cfg.xml/Hibernate" uuid="e818bf1b-0360-45f1-8fd9-e6bda1010667">
+    <data-source source="LOCAL" name="hibernate.cfg.xml/Hibernate" uuid="c5696060-b66b-4660-9e5a-85a72ecaa535">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <imported>true</imported>
@@ -16,7 +16,7 @@
 
 /home/bohdan/University/Professional practice of PI/code/professional.practice/src/main/resources/hibernate.cfg.xml</remarks>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/mydatabase?serverTimezone=UTC</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5432/professional_practice?serverTimezone=UTC</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

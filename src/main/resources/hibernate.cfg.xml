@@ -4,7 +4,7 @@
         "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
     <session-factory>
-        <property name = "hibernate.connection.url">jdbc:postgresql://localhost:5432/mydatabase?serverTimezone=UTC</property>
+        <property name = "hibernate.connection.url">jdbc:postgresql://localhost:5432/professional_practice?serverTimezone=UTC</property>
         <property name = "hibernate.connection.username">bohdandb</property>
         <property name = "hibernate.connection.password">root</property>
         <property name = "hibernate.connection.driver_class">org.postgresql.Driver</property>
@@ -14,34 +14,26 @@
         <property name = "hibernate.highlight_sql">true</property>
         <property name = "hibernate.hbm2ddl.auto">update</property>
 
-        <!-- Table -->
-        <mapping class="org.university.business_logic.tables.AccessRight"/>
-        <mapping class="org.university.business_logic.tables.Authentication"/>
-        <mapping class="org.university.business_logic.tables.BinFileProject"/>
-        <mapping class="org.university.business_logic.tables.CheckList"/>
-        <mapping class="org.university.business_logic.tables.CommandProject"/>
-        <mapping class="org.university.business_logic.tables.CommentTask"/>
-        <mapping class="org.university.business_logic.tables.Document"/>
-        <mapping class="org.university.business_logic.tables.Employee"/>
-        <mapping class="org.university.business_logic.tables.EmployeeAccessRight"/>
-        <mapping class="org.university.business_logic.tables.ExecutionStatus"/>
-        <mapping class="org.university.business_logic.tables.FileExtension"/>
-        <mapping class="org.university.business_logic.tables.HistoryChange"/>
-        <mapping class="org.university.business_logic.tables.Position"/>
-        <mapping class="org.university.business_logic.tables.PriorityTask"/>
-        <mapping class="org.university.business_logic.tables.Project"/>
-        <mapping class="org.university.business_logic.tables.Sprint"/>
-        <mapping class="org.university.business_logic.tables.StateTesting"/>
-        <mapping class="org.university.business_logic.tables.Task"/>
-        <mapping class="org.university.business_logic.tables.TaskTesting"/>
-        <mapping class="org.university.business_logic.tables.TypeChange"/>
-        <mapping class="org.university.business_logic.tables.TypeComplexity"/>
+        <!-- Reference book -->
+        <mapping class="org.university.entities.reference_book.AccessRight"/>
+        <mapping class="org.university.entities.reference_book.ExecutionStatus"/>
+        <mapping class="org.university.entities.reference_book.FileExtension"/>
+        <mapping class="org.university.entities.reference_book.Position"/>
+        <mapping class="org.university.entities.reference_book.PriorityTask"/>
+        <mapping class="org.university.entities.reference_book.StateTesting"/>
+        <mapping class="org.university.entities.reference_book.TypeComplexity"/>
 
-        <!-- View -->
-        <mapping class="org.university.business_logic.tables.view.FullProjectInfo"/>
-        <mapping class="org.university.business_logic.tables.view.FullSprintInfo"/>
-        <mapping class="org.university.business_logic.tables.view.FullTaskInfo"/>
-        <mapping class="org.university.business_logic.tables.view.FullCheckListInfo"/>
-        <mapping class="org.university.business_logic.tables.view.FullTaskTestingInfo"/>
+        <!-- Table -->
+        <mapping class="org.university.entities.tables.BinFileProject"/>
+        <mapping class="org.university.entities.tables.CheckList"/>
+        <mapping class="org.university.entities.tables.CommandProject"/>
+        <mapping class="org.university.entities.tables.CommentTask"/>
+        <mapping class="org.university.entities.tables.Document"/>
+        <mapping class="org.university.entities.tables.Employee"/>
+        <mapping class="org.university.entities.tables.EmployeeAccessRight"/>
+        <mapping class="org.university.entities.tables.Project"/>
+        <mapping class="org.university.entities.tables.Sprint"/>
+        <mapping class="org.university.entities.tables.Task"/>
+        <mapping class="org.university.entities.tables.TaskTesting"/>
     </session-factory>
 </hibernate-configuration>
