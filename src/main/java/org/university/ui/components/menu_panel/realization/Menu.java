@@ -1,6 +1,6 @@
-package org.university.ui.components.realization;
+package org.university.ui.components.menu_panel.realization;
 
-import org.university.ui.components.interfaces.Component;
+import org.university.ui.components.menu_panel.interfaces.Component;
 import org.university.ui.mediator.interfaces.Mediator;
 
 import javax.swing.*;

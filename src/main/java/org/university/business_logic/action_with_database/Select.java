@@ -9,6 +9,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.jetbrains.annotations.NotNull;
+import org.university.business_logic.Interval;
 import org.university.business_logic.search_tools.SearchOperation;
 import org.university.business_logic.search_tools.SearchCriteria;
 import org.university.business_logic.utils.HibernateUtil;
@@ -60,7 +61,7 @@ public interface Select<T extends TableID> {
                     .toList();
         }
         catch (Exception e) {
-            throw new SelectedException("Сталася помилка під час вибору даних з таблиці. Зверніться до техпідтримки.");
+            throw new SelectedException("Сталася помилка під час вибору даних з таблиці. Текст помилки: " + e.getMessage());
         }
     }
 
@@ -68,6 +69,12 @@ public interface Select<T extends TableID> {
         return switch (searchCriteria.operation()) {
             case EQUAL -> builder.equal(root.get(searchCriteria.key()), searchCriteria.value());
             case LIKE -> builder.like(root.get(searchCriteria.key()), "%" + searchCriteria.value() + "%");
+            case BETWEEN -> {
+                if (searchCriteria.value() instanceof Interval rangeValues) {
+                    yield builder.between(root.get(searchCriteria.key()), rangeValues.fromTimestamp(), rangeValues.toTimestamp());
+                }
+                throw new SelectedException("Для операції BETWEEN значенням має бути типу Interval.");
+            }
         };
     }
 }

@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 public interface TableID extends Comparable<TableID> {
     Long getId();
     void setId(Long id);
+    String toString();
 
     @Override
     default int compareTo(@NotNull TableID o){

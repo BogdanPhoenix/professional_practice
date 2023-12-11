@@ -1,16 +1,13 @@
-package org.university.ui.components.realization;
+package org.university.ui.components.menu_panel.realization;
 
 import org.jetbrains.annotations.NotNull;
 import org.university.business_logic.models.interfaces.Model;
 import org.university.business_logic.models.realization.ReferenceBookModel;
 import org.university.business_logic.models.realization.TableModel;
-import org.university.ui.components.interfaces.Component;
+import org.university.ui.components.menu_panel.interfaces.Component;
 import org.university.ui.control_panel.interfaces.ControlPanel;
+import org.university.ui.control_panel.realization.*;
 import org.university.ui.mediator.interfaces.Mediator;
-import org.university.ui.control_panel.realization.DeletePanel;
-import org.university.ui.control_panel.realization.InsertPanel;
-import org.university.ui.control_panel.realization.UpdatePanel;
-import org.university.ui.control_panel.realization.ViewPanel;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -30,7 +27,7 @@ public class MenuBar extends JMenuBar implements Component {
     }
 
     private void createReferenceBookMenu(){
-        viewReferenceItem = createMenuItem("Перегляд", new ViewPanel(mediator), ReferenceBookModel.getInstance());
+        viewReferenceItem = createMenuItem("Перегляд", new SelectReferenceBookPanel(), ReferenceBookModel.getInstance());
         JMenuItem insertReferenceItem = createMenuItem("Створити", new InsertPanel(mediator), ReferenceBookModel.getInstance());
         JMenuItem deleteReferenceItem = createMenuItem("Видалити", new DeletePanel(mediator), ReferenceBookModel.getInstance());
         JMenuItem updateReferenceItem = createMenuItem("Оновити", new UpdatePanel(mediator), ReferenceBookModel.getInstance());
@@ -45,7 +42,7 @@ public class MenuBar extends JMenuBar implements Component {
     }
 
     private void createTableMenu(){
-        JMenuItem viewTableItem = createMenuItem("Перегляд", new ViewPanel(mediator), TableModel.getInstance());
+        JMenuItem viewTableItem = createMenuItem("Перегляд", new SelectTablePanel(mediator), TableModel.getInstance());
         JMenuItem insertTableItem = createMenuItem("Створити", new InsertPanel(mediator), TableModel.getInstance());
         JMenuItem deleteTableItem = createMenuItem("Видалити", new DeletePanel(mediator), TableModel.getInstance());
         JMenuItem updateTableItem = createMenuItem("Оновити", new UpdatePanel(mediator), TableModel.getInstance());

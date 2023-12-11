@@ -1,9 +1,10 @@
 package org.university.business_logic.utils.reference_book;
 
 import org.jetbrains.annotations.NotNull;
-import org.university.business_logic.utils.ObjectName;
+import org.university.business_logic.attribute_name.AttributeName;
 import org.university.business_logic.search_tools.SearchOperation;
-import org.university.business_logic.abstracts.TableModelView;
+import org.university.business_logic.abstracts.ReferenceBookModelView;
+import org.university.business_logic.attribute_name.AttributeNameSimple;
 import org.university.entities.reference_book.AccessRight;
 import org.university.business_logic.search_tools.SearchCriteria;
 import org.university.exception.CastingException;
@@ -12,11 +13,11 @@ import org.university.exception.SelectedException;
 import javax.swing.*;
 import java.util.List;
 
-public class AccessRightUtil extends TableModelView<AccessRight> {
-    private static final ObjectName NAME_RIGHT = new ObjectName("Право доступу", "nameRight");
+public class AccessRightUtil extends ReferenceBookModelView<AccessRight> {
+    private static final AttributeName NAME_RIGHT = new AttributeNameSimple(0,"Право доступу", "nameRight");
 
     public AccessRightUtil(){
-        titleColumns = List.of( NAME_RIGHT.nameForUser() );
+        titleColumns = List.of( NAME_RIGHT.getNameForUser() );
         nameTable = "Права доступу";
     }
 
@@ -32,8 +33,8 @@ public class AccessRightUtil extends TableModelView<AccessRight> {
 
     @Override
     protected SearchCriteria[] criteriaToSearchEntities(@NotNull JTable table, int indexRow){
-        String value = (String)table.getValueAt(indexRow, 0);
-        return new SearchCriteria[]{ new SearchCriteria(NAME_RIGHT.nameForSystem(), value, SearchOperation.EQUAL) };
+        var value = table.getValueAt(indexRow, NAME_RIGHT.getId());
+        return new SearchCriteria[]{ new SearchCriteria(NAME_RIGHT.getNameForSystem(), value, SearchOperation.EQUAL) };
     }
 
     @Override
@@ -42,7 +43,7 @@ public class AccessRightUtil extends TableModelView<AccessRight> {
             panelBody.removeAll();
         }
 
-        panelBody = windowComponent.createTextFieldInputPanel(NAME_RIGHT);
+        panelBody = panelComponent.createTextFieldInputPanel(NAME_RIGHT);
 
         return panelBody;
     }
@@ -55,7 +56,7 @@ public class AccessRightUtil extends TableModelView<AccessRight> {
     @Override
     protected SearchCriteria[] criteriaToSearchDuplicate(@NotNull AccessRight entity) {
         return new SearchCriteria[]{
-                new SearchCriteria(NAME_RIGHT.nameForSystem(), entity.getNameRight(), SearchOperation.EQUAL)
+                new SearchCriteria(NAME_RIGHT.getNameForSystem(), entity.getNameRight(), SearchOperation.EQUAL)
         };
     }
 
@@ -75,6 +76,6 @@ public class AccessRightUtil extends TableModelView<AccessRight> {
     @Override
     public void fillingFields() throws SelectedException {
         var entity = getSelectedEntity();
-        windowComponent.updateTextField(NAME_RIGHT, entity.getNameRight());
+        panelComponent.updateTextField(NAME_RIGHT, entity.getNameRight());
     }
 }

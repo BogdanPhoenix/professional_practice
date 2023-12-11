@@ -1,43 +1,47 @@
 package org.university.business_logic.utils.tables;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.university.business_logic.utils.ObjectName;
-import org.university.business_logic.utils.reference_book.FileExtensionUtil;
+import org.university.business_logic.abstracts.TableModelView;
+import org.university.business_logic.attribute_name.AttributeName;
+import org.university.business_logic.attribute_name.AttributeNameComboBox;
+import org.university.business_logic.attribute_name.AttributeNameSimple;
 import org.university.entities.reference_book.FileExtension;
 import org.university.entities.tables.Document;
 import org.university.entities.tables.Employee;
 import org.university.entities.tables.Project;
 import org.university.business_logic.search_tools.SearchOperation;
-import org.university.business_logic.abstracts.TableModelView;
 import org.university.business_logic.search_tools.SearchCriteria;
 import org.university.exception.CastingException;
 import org.university.exception.SelectedException;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.event.ActionListener;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class DocumentUtil extends TableModelView<Document> {
-    private static final ObjectName PROJECT = new ObjectName("Проект", "project");
-    private static final ObjectName PERFORMER = new ObjectName("Виконавець", "performer");
-    private static final ObjectName FILE_EXTENSION = new ObjectName("Розширення файлу", "fileExtension");
-    private static final ObjectName NAME_FILE = new ObjectName("Назва файлу", "nameFile");
-    private static final ObjectName DATE_DOWN = new ObjectName("Дата завантаження", "bitFile");
-    private static final ObjectName DESCRIPTION = new ObjectName("Опис", "description");
-    private static final ObjectName BIT_FILE = new ObjectName("Файл", "bitFile");
+    private static final AttributeName PROJECT = new AttributeNameComboBox(0, "Проект", "project", Project.class);
+    private static final AttributeName PERFORMER = new AttributeNameComboBox(1, "Виконавець", "performer", Employee.class);
+    private static final AttributeName FILE_EXTENSION = new AttributeNameComboBox(2, "Розширення файлу", "fileExtension", FileExtension.class);
+    private static final AttributeName NAME_FILE = new AttributeNameSimple(3, "Назва файлу", "nameFile");
+    private static final AttributeName BIT_FILE = new AttributeNameSimple(4, "Файл", "bitFile");
+    private static final AttributeName DATE_DOWN = new AttributeNameSimple(5, "Дата завантаження", "dateTimeDown");
+    private static final AttributeName DESCRIPTION = new AttributeNameSimple(6, "Опис", "description");
 
     public DocumentUtil(){
         titleColumns = List.of(
-                PROJECT.nameForUser(),
-                PERFORMER.nameForUser(),
-                FILE_EXTENSION.nameForUser(),
-                NAME_FILE.nameForUser(),
-                BIT_FILE.nameForUser(),
-                DATE_DOWN.nameForUser(),
-                DESCRIPTION.nameForUser()
+                PROJECT.getNameForUser(),
+                PERFORMER.getNameForUser(),
+                FILE_EXTENSION.getNameForUser(),
+                NAME_FILE.getNameForUser(),
+                BIT_FILE.getNameForUser(),
+                DATE_DOWN.getNameForUser(),
+                DESCRIPTION.getNameForUser()
         );
         nameTable = "Документація";
     }
@@ -62,36 +66,20 @@ public class DocumentUtil extends TableModelView<Document> {
 
     @Override
     protected SearchCriteria[] criteriaToSearchEntities(@NotNull JTable table, int indexRow) {
-        Project project = (Project) table.getValueAt(indexRow, 0);
-        String nameFile = (String) table.getValueAt(indexRow, 3);
-        byte[] bitFile = (byte[]) table.getValueAt(indexRow, 4);
+        var project = table.getValueAt(indexRow, PROJECT.getId());
+        var nameFile = table.getValueAt(indexRow, NAME_FILE.getId());
+        var bitFile = table.getValueAt(indexRow, BIT_FILE.getId());
 
         return new SearchCriteria[] {
-                new SearchCriteria(PROJECT.nameForSystem(), project, SearchOperation.EQUAL),
-                new SearchCriteria(NAME_FILE.nameForSystem(), nameFile, SearchOperation.EQUAL),
-                new SearchCriteria(BIT_FILE.nameForSystem(), bitFile, SearchOperation.EQUAL)
+                new SearchCriteria(PROJECT.getNameForSystem(), project, SearchOperation.EQUAL),
+                new SearchCriteria(NAME_FILE.getNameForSystem(), nameFile, SearchOperation.EQUAL),
+                new SearchCriteria(BIT_FILE.getNameForSystem(), bitFile, SearchOperation.EQUAL)
         };
     }
 
     @Override
     public JPanel dataEntryPanel() {
-        if(panelBody != null) {
-            panelBody.removeAll();
-        }
-
-        panelBody = new JPanel();
-        panelBody.setLayout(new GridLayout(6, 1));
-
-        panelBody.add(windowComponent.createComboBoxPanel(PROJECT, new ProjectUtil()));
-        panelBody.add(windowComponent.createComboBoxPanel(PERFORMER, new EmployeeUtil()));
-        panelBody.add(windowComponent.createComboBoxPanel(FILE_EXTENSION, new FileExtensionUtil()));
-        panelBody.add(windowComponent.createTextFieldInputPanel(NAME_FILE));
-        panelBody.add(windowComponent.createTextFieldInputPanel(BIT_FILE));
-        panelBody.add(windowComponent.createTextFieldInputPanel(DESCRIPTION));
-
-        panelBody = windowComponent.createScrollPanel(panelBody);
-
-        return panelBody;
+        return createPanel(false);
     }
 
     @Override
@@ -102,7 +90,7 @@ public class DocumentUtil extends TableModelView<Document> {
         if(nameFile.isEmpty() || bitFile.isEmpty()){
             throw new SelectedException(String.format(
                     "Одне з наступних обов'язкових полів не заповнене: %n%s %n%s",
-                    NAME_FILE.nameForUser(), BIT_FILE.nameForUser()
+                    NAME_FILE.getNameForUser(), BIT_FILE.getNameForUser()
             ));
         }
     }
@@ -110,9 +98,9 @@ public class DocumentUtil extends TableModelView<Document> {
     @Override
     protected SearchCriteria[] criteriaToSearchDuplicate(@NotNull Document entity) {
         return new SearchCriteria[] {
-                new SearchCriteria(PROJECT.nameForSystem(), entity.getProject(), SearchOperation.EQUAL),
-                new SearchCriteria(NAME_FILE.nameForSystem(), entity.getNameFile(), SearchOperation.EQUAL),
-                new SearchCriteria(BIT_FILE.nameForSystem(), entity.getBitFile(), SearchOperation.EQUAL)
+                new SearchCriteria(PROJECT.getNameForSystem(), entity.getProject(), SearchOperation.EQUAL),
+                new SearchCriteria(NAME_FILE.getNameForSystem(), entity.getNameFile(), SearchOperation.EQUAL),
+                new SearchCriteria(BIT_FILE.getNameForSystem(), entity.getBitFile(), SearchOperation.EQUAL)
         };
     }
 
@@ -146,11 +134,60 @@ public class DocumentUtil extends TableModelView<Document> {
     protected void fillingFields() throws SelectedException {
         var entity = getSelectedEntity();
 
-        windowComponent.updateComboBox(PROJECT, entity.getProject());
-        windowComponent.updateComboBox(PERFORMER, entity.getPerformer());
-        windowComponent.updateComboBox(FILE_EXTENSION, entity.getFileExtension());
-        windowComponent.updateTextField(NAME_FILE, entity.getNameFile());
-        windowComponent.updateTextField(BIT_FILE, new String(entity.getBitFile(), StandardCharsets.UTF_8));
-        windowComponent.updateTextField(DESCRIPTION, entity.getDescription());
+        panelComponent.updateComboBox(PROJECT, entity.getProject());
+        panelComponent.updateComboBox(PERFORMER, entity.getPerformer());
+        panelComponent.updateComboBox(FILE_EXTENSION, entity.getFileExtension());
+        panelComponent.updateTextField(NAME_FILE, entity.getNameFile());
+        panelComponent.updateTextField(BIT_FILE, new String(entity.getBitFile(), StandardCharsets.UTF_8));
+        panelComponent.updateTextField(DESCRIPTION, entity.getDescription());
+    }
+
+    @Override
+    public JPanel selectEntryPanel() {
+        return createPanel(true);
+    }
+
+    private JPanel createPanel(boolean flag){
+        clearPanelBody();
+        List<JPanel> components = new ArrayList<>();
+
+        if(flag){
+            components.addAll(createIntervalPanels(DATE_DOWN));
+        }
+
+        components.addAll(createComboBoxPanels(flag, PROJECT, PERFORMER, FILE_EXTENSION));
+        components.addAll(createTextFieldPanels(flag, names(flag)));
+        addAllComponentsToPanel(components);
+
+        return panelBody;
+    }
+
+    @Contract(value = "_ -> new", pure = true)
+    private AttributeName @NotNull [] names(boolean flag) {
+        if(flag){
+            return new AttributeName[] {NAME_FILE};
+        }
+        else {
+            return new AttributeName[] {NAME_FILE, BIT_FILE, DESCRIPTION};
+        }
+    }
+
+    @Override
+    protected List<Optional<SearchCriteria>> createListCriteria() {
+        List<Optional<SearchCriteria>> searchCriteria = new ArrayList<>();
+
+        searchCriteria.addAll(criteriaFromInterval(DATE_DOWN));
+        searchCriteria.addAll(criteriaFromComboBox(PROJECT, PERFORMER, FILE_EXTENSION));
+        searchCriteria.addAll(criteriaTextField(NAME_FILE));
+
+        return searchCriteria;
+    }
+
+    @Override
+    public ActionListener createGraph() {
+        return e -> {
+            List<AttributeName> variants = List.of(PROJECT, PERFORMER, FILE_EXTENSION);
+            createGraphUI(variants);
+        };
     }
 }

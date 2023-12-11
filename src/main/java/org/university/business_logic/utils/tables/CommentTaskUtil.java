@@ -1,38 +1,42 @@
 package org.university.business_logic.utils.tables;
 
 import org.jetbrains.annotations.NotNull;
-import org.university.business_logic.utils.ObjectName;
-import org.university.business_logic.search_tools.SearchOperation;
-import org.university.entities.tables.*;
 import org.university.business_logic.abstracts.TableModelView;
+import org.university.business_logic.attribute_name.AttributeName;
+import org.university.business_logic.search_tools.SearchOperation;
+import org.university.business_logic.attribute_name.AttributeNameComboBox;
+import org.university.business_logic.attribute_name.AttributeNameSimple;
+import org.university.entities.tables.*;
 import org.university.business_logic.search_tools.SearchCriteria;
 import org.university.exception.CastingException;
 import org.university.exception.SelectedException;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.event.ActionListener;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class CommentTaskUtil extends TableModelView<CommentTask> {
-    private static final ObjectName PROJECT = new ObjectName("Проект", "project");
-    private static final ObjectName SPRINT = new ObjectName("Спринт", "sprint");
-    private static final ObjectName TASK = new ObjectName("Завдання", "task");
-    private static final ObjectName TASK_TESTING = new ObjectName("Завдання тестування", "taskTesting");
-    private static final ObjectName PERFORMER = new ObjectName("Власник", "performer");
-    private static final ObjectName COMMENT_TEXT = new ObjectName("Коментар", "commentText");
-    private static final ObjectName DATE_CREATE = new ObjectName("Дата створення", "dateTimeCreate");
+    private static final AttributeName PROJECT = new AttributeNameComboBox(0, "Проект", "project", Project.class);
+    private static final AttributeName SPRINT = new AttributeNameComboBox(1, "Спринт", "sprint", Sprint.class);
+    private static final AttributeName TASK = new AttributeNameComboBox(2, "Завдання", "task", Task.class);
+    private static final AttributeName TASK_TESTING = new AttributeNameComboBox(3, "Завдання тестування", "taskTesting", TaskTesting.class);
+    private static final AttributeName PERFORMER = new AttributeNameComboBox(4, "Власник", "performer", Employee.class);
+    private static final AttributeName COMMENT_TEXT = new AttributeNameSimple(5, "Коментар", "commentText");
+    private static final AttributeName DATE_CREATE = new AttributeNameSimple(6, "Дата створення", "dateTimeCreate");
 
     public CommentTaskUtil(){
         titleColumns = List.of(
-                PROJECT.nameForUser(),
-                SPRINT.nameForUser(),
-                TASK.nameForUser(),
-                TASK_TESTING.nameForUser(),
-                PERFORMER.nameForUser(),
-                COMMENT_TEXT.nameForUser(),
-                DATE_CREATE.nameForUser()
+                PROJECT.getNameForUser(),
+                SPRINT.getNameForUser(),
+                TASK.getNameForUser(),
+                TASK_TESTING.getNameForUser(),
+                PERFORMER.getNameForUser(),
+                COMMENT_TEXT.getNameForUser(),
+                DATE_CREATE.getNameForUser()
         );
         nameTable = "Коментарі до завдань";
     }
@@ -62,32 +66,18 @@ public class CommentTaskUtil extends TableModelView<CommentTask> {
 
     @Override
     protected SearchCriteria[] criteriaToSearchEntities(@NotNull JTable table, int indexRow) {
-        String commentText = (String) table.getValueAt(indexRow, 5);
-        return new SearchCriteria[] { new SearchCriteria(COMMENT_TEXT.nameForSystem(), commentText, SearchOperation.EQUAL) };
+        var commentText = table.getValueAt(indexRow, COMMENT_TEXT.getId());
+        return new SearchCriteria[] { new SearchCriteria(COMMENT_TEXT.getNameForSystem(), commentText, SearchOperation.EQUAL) };
     }
 
     @Override
     public JPanel dataEntryPanel() {
-        if (panelBody != null) {
-            panelBody.removeAll();
-        }
+        clearPanelBody();
 
-        panelBody = new JPanel();
-        panelBody.setLayout(new GridLayout(6, 1));
-
-        var taskTesting = windowComponent.createComboBoxPanel(TASK_TESTING, new TaskTestingUtil());
-        var task = windowComponent.createComboBoxPanel(TASK, new TaskUtil(), TASK_TESTING);
-        var sprint = windowComponent.createComboBoxPanel(SPRINT, new SprintUtil(), TASK);
-        var project = windowComponent.createComboBoxPanel(PROJECT, new ProjectUtil(), SPRINT);
-
-        panelBody.add(project);
-        panelBody.add(sprint);
-        panelBody.add(task);
-        panelBody.add(taskTesting);
-        panelBody.add(windowComponent.createComboBoxPanel(PERFORMER, new EmployeeUtil()));
-        panelBody.add(windowComponent.createTextFieldInputPanel(COMMENT_TEXT));
-
-        panelBody = windowComponent.createScrollPanel(panelBody);
+        List<JPanel> components = new ArrayList<>();
+        components.addAll(createCoherentComboBoxPanels(PROJECT, SPRINT, TASK, TASK_TESTING));
+        components.addAll(createComboBoxPanels(false, PERFORMER));
+        addAllComponentsToPanel(components);
 
         return panelBody;
     }
@@ -100,7 +90,7 @@ public class CommentTaskUtil extends TableModelView<CommentTask> {
     @Override
     protected SearchCriteria[] criteriaToSearchDuplicate(@NotNull CommentTask entity) {
         return new SearchCriteria[] {
-                new SearchCriteria(COMMENT_TEXT.nameForSystem(), entity.getCommentText(), SearchOperation.EQUAL)
+                new SearchCriteria(COMMENT_TEXT.getNameForSystem(), entity.getCommentText(), SearchOperation.EQUAL)
         };
     }
 
@@ -131,11 +121,40 @@ public class CommentTaskUtil extends TableModelView<CommentTask> {
         var sprintEntity = taskEntity.getSprint();
         var projectEntity = sprintEntity.getProject();
 
-        windowComponent.updateComboBox(PROJECT, projectEntity);
-        windowComponent.updateComboBox(SPRINT, sprintEntity);
-        windowComponent.updateComboBox(TASK, taskEntity);
-        windowComponent.updateComboBox(TASK_TESTING, entity.getTaskTesting());
-        windowComponent.updateComboBox(PERFORMER, entity.getPerformer());
-        windowComponent.updateTextField(COMMENT_TEXT, entity.getCommentText());
+        panelComponent.updateComboBox(PROJECT, projectEntity);
+        panelComponent.updateComboBox(SPRINT, sprintEntity);
+        panelComponent.updateComboBox(TASK, taskEntity);
+        panelComponent.updateComboBox(TASK_TESTING, entity.getTaskTesting());
+        panelComponent.updateComboBox(PERFORMER, entity.getPerformer());
+        panelComponent.updateTextField(COMMENT_TEXT, entity.getCommentText());
+    }
+
+    @Override
+    public JPanel selectEntryPanel() {
+        clearPanelBody();
+
+        List<JPanel> components = new ArrayList<>();
+        components.addAll(createIntervalPanels(DATE_CREATE));
+        components.addAll(createComboBoxPanels(true, TASK_TESTING, PERFORMER));
+        addAllComponentsToPanel(components);
+
+        return panelBody;
+    }
+    @Override
+    protected List<Optional<SearchCriteria>> createListCriteria() {
+        List<Optional<SearchCriteria>> searchCriteria = new ArrayList<>();
+
+        searchCriteria.addAll(criteriaFromInterval(DATE_CREATE));
+        searchCriteria.addAll(criteriaFromComboBox(TASK_TESTING, PERFORMER));
+
+        return searchCriteria;
+    }
+
+    @Override
+    public ActionListener createGraph() {
+        return e -> {
+            List<AttributeName> variants = List.of(PROJECT, SPRINT, TASK, TASK_TESTING, PERFORMER);
+            createGraphUI(variants);
+        };
     }
 }

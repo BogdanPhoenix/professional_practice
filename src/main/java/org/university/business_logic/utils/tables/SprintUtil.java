@@ -1,44 +1,47 @@
 package org.university.business_logic.utils.tables;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.university.business_logic.utils.ObjectName;
-import org.university.business_logic.utils.reference_book.ExecutionStatusUtil;
-import org.university.business_logic.utils.reference_book.TypeComplexityUtil;
+import org.university.business_logic.abstracts.TableModelView;
+import org.university.business_logic.attribute_name.AttributeName;
+import org.university.business_logic.attribute_name.AttributeNameComboBox;
+import org.university.business_logic.attribute_name.AttributeNameSimple;
 import org.university.entities.reference_book.ExecutionStatus;
 import org.university.entities.reference_book.TypeComplexity;
 import org.university.entities.tables.Project;
 import org.university.entities.tables.Sprint;
 import org.university.business_logic.search_tools.SearchOperation;
-import org.university.business_logic.abstracts.TableModelView;
 import org.university.business_logic.search_tools.SearchCriteria;
 import org.university.exception.CastingException;
 import org.university.exception.SelectedException;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.event.ActionListener;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class SprintUtil extends TableModelView<Sprint> {
-    private static final ObjectName PROJECT = new ObjectName("Назва проекту", "project");
-    private static final ObjectName SPRINT = new ObjectName("Назва спринту", "nameSprint");
-    private static final ObjectName EXECUTION = new ObjectName("Стан виконання", "executionStatus");
-    private static final ObjectName COMPLEXITY = new ObjectName("Тип складності", "complexity");
-    private static final ObjectName DATE_START = new ObjectName("Дата початку", "dateTimeCreate");
-    private static final ObjectName PLANNED_COMPLETION = new ObjectName("Запланована дата закінчення", "plannedCompletionDate");
-    private static final ObjectName DATE_END = new ObjectName("Дата закінчення", "dateTimeEnd");
-    private static final ObjectName DESCRIPTION = new ObjectName("Опис", "description");
+    private static final AttributeName PROJECT = new AttributeNameComboBox(0, "Назва проекту", "project", Project.class);
+    private static final AttributeName EXECUTION = new AttributeNameComboBox(1, "Стан виконання", "executionStatus", ExecutionStatus.class);
+    private static final AttributeName COMPLEXITY = new AttributeNameComboBox(2, "Тип складності", "complexity", TypeComplexity.class);
+    private static final AttributeName SPRINT = new AttributeNameSimple(3, "Назва спринту", "nameSprint");
+    private static final AttributeName DATE_START = new AttributeNameSimple(4, "Дата початку", "dateTimeCreate");
+    private static final AttributeName PLANNED_COMPLETION = new AttributeNameSimple(5, "Запланована дата закінчення", "plannedCompletionDate");
+    private static final AttributeName DATE_END = new AttributeNameSimple(6, "Дата закінчення", "dateTimeEnd");
+    private static final AttributeName DESCRIPTION = new AttributeNameSimple(7, "Опис", "description");
 
     public SprintUtil(){
         titleColumns = List.of(
-                PROJECT.nameForUser(),
-                SPRINT.nameForUser(),
-                EXECUTION.nameForUser(),
-                COMPLEXITY.nameForUser(),
-                DATE_START.nameForUser(),
-                PLANNED_COMPLETION.nameForUser(),
-                DATE_END.nameForUser(),
-                DESCRIPTION.nameForUser()
+                PROJECT.getNameForUser(),
+                EXECUTION.getNameForUser(),
+                COMPLEXITY.getNameForUser(),
+                SPRINT.getNameForUser(),
+                DATE_START.getNameForUser(),
+                PLANNED_COMPLETION.getNameForUser(),
+                DATE_END.getNameForUser(),
+                DESCRIPTION.getNameForUser()
         );
         nameTable = "Спринти";
     }
@@ -52,9 +55,9 @@ public class SprintUtil extends TableModelView<Sprint> {
     protected Object[] createAttribute(@NotNull Sprint value) {
         return new Object[]{
                 value.getProject(),
-                value.getNameSprint(),
                 value.getExecutionStatus(),
                 value.getComplexity(),
+                value.getNameSprint(),
                 value.getDateTimeCreate(),
                 value.getPlannedCompletionDate(),
                 value.getDateTimeEnd(),
@@ -64,36 +67,18 @@ public class SprintUtil extends TableModelView<Sprint> {
 
     @Override
     protected SearchCriteria[] criteriaToSearchEntities(@NotNull JTable table, int indexRow) {
-        Project project = (Project) table.getValueAt(indexRow, 0);
-        String nameSprint = (String) table.getValueAt(indexRow, 1);
+        var project = table.getValueAt(indexRow, PROJECT.getId());
+        var nameSprint = table.getValueAt(indexRow, SPRINT.getId());
 
         return new SearchCriteria[] {
-                new SearchCriteria(PROJECT.nameForSystem(), project, SearchOperation.EQUAL),
-                new SearchCriteria(SPRINT.nameForSystem(), nameSprint, SearchOperation.EQUAL)
+                new SearchCriteria(PROJECT.getNameForSystem(), project, SearchOperation.EQUAL),
+                new SearchCriteria(SPRINT.getNameForSystem(), nameSprint, SearchOperation.EQUAL)
         };
     }
 
     @Override
     public JPanel dataEntryPanel() {
-        if(panelBody != null) {
-            panelBody.removeAll();
-        }
-
-        panelBody = new JPanel();
-        panelBody.setLayout(new GridLayout(8, 1));
-
-        panelBody.add(windowComponent.createComboBoxPanel(PROJECT, new ProjectUtil()));
-        panelBody.add(windowComponent.createTextFieldInputPanel(SPRINT));
-        panelBody.add(windowComponent.createComboBoxPanel(EXECUTION, new ExecutionStatusUtil()));
-        panelBody.add(windowComponent.createComboBoxPanel(COMPLEXITY, new TypeComplexityUtil()));
-        panelBody.add(windowComponent.createTextFieldInputPanel(DATE_START));
-        panelBody.add(windowComponent.createTextFieldInputPanel(PLANNED_COMPLETION));
-        panelBody.add(windowComponent.createTextFieldInputPanel(DATE_END));
-        panelBody.add(windowComponent.createTextFieldInputPanel(DESCRIPTION));
-
-        panelBody = windowComponent.createScrollPanel(panelBody);
-
-        return panelBody;
+        return createPanel(false);
     }
 
     @Override
@@ -105,7 +90,7 @@ public class SprintUtil extends TableModelView<Sprint> {
         if(nameSprint.isEmpty() || dateStart.isEmpty() || plannedCompletion.isEmpty()){
             throw new SelectedException(String.format(
                     "Одне з наступних обов'язкових полів не заповнене: %n%s %n%s %n%s",
-                    SPRINT.nameForUser(), DATE_START.nameForUser(), PLANNED_COMPLETION.nameForUser()
+                    SPRINT.getNameForUser(), DATE_START.getNameForUser(), PLANNED_COMPLETION.getNameForUser()
             ));
         }
     }
@@ -113,8 +98,8 @@ public class SprintUtil extends TableModelView<Sprint> {
     @Override
     protected SearchCriteria[] criteriaToSearchDuplicate(@NotNull Sprint entity) {
         return new SearchCriteria[] {
-                new SearchCriteria(PROJECT.nameForSystem(), entity.getProject(), SearchOperation.EQUAL),
-                new SearchCriteria(SPRINT.nameForSystem(), entity.getNameSprint(), SearchOperation.EQUAL)
+                new SearchCriteria(PROJECT.getNameForSystem(), entity.getProject(), SearchOperation.EQUAL),
+                new SearchCriteria(SPRINT.getNameForSystem(), entity.getNameSprint(), SearchOperation.EQUAL)
         };
     }
 
@@ -153,14 +138,63 @@ public class SprintUtil extends TableModelView<Sprint> {
         var entity = getSelectedEntity();
         String dateEnd = convertFromTimestampToString(entity.getDateTimeEnd());
 
-        windowComponent.updateComboBox(PROJECT, entity.getProject());
-        windowComponent.updateComboBox(EXECUTION, entity.getExecutionStatus());
-        windowComponent.updateComboBox(COMPLEXITY, entity.getComplexity());
+        panelComponent.updateComboBox(PROJECT, entity.getProject());
+        panelComponent.updateComboBox(EXECUTION, entity.getExecutionStatus());
+        panelComponent.updateComboBox(COMPLEXITY, entity.getComplexity());
 
-        windowComponent.updateTextField(SPRINT, entity.getNameSprint());
-        windowComponent.updateTextField(DATE_START, entity.getDateTimeCreate().toString());
-        windowComponent.updateTextField(PLANNED_COMPLETION, entity.getPlannedCompletionDate().toString());
-        windowComponent.updateTextField(DATE_END, dateEnd);
-        windowComponent.updateTextField(DESCRIPTION, entity.getDescription());
+        panelComponent.updateTextField(SPRINT, entity.getNameSprint());
+        panelComponent.updateTextField(DATE_START, entity.getDateTimeCreate().toString());
+        panelComponent.updateTextField(PLANNED_COMPLETION, entity.getPlannedCompletionDate().toString());
+        panelComponent.updateTextField(DATE_END, dateEnd);
+        panelComponent.updateTextField(DESCRIPTION, entity.getDescription());
+    }
+
+    @Override
+    public JPanel selectEntryPanel() {
+        return createPanel(true);
+    }
+
+    private JPanel createPanel(boolean flag){
+        clearPanelBody();
+        List<JPanel> components = new ArrayList<>();
+
+        if(flag){
+            components.addAll(createIntervalPanels(DATE_START, PLANNED_COMPLETION));
+        }
+
+        components.addAll(createComboBoxPanels(flag, PROJECT, EXECUTION, COMPLEXITY));
+        components.addAll(createTextFieldPanels(flag, names(flag)));
+        addAllComponentsToPanel(components);
+
+        return panelBody;
+    }
+
+    @Contract(value = "_ -> new", pure = true)
+    private AttributeName @NotNull [] names(boolean flag){
+        if(flag){
+            return new AttributeName[] {SPRINT};
+        }
+        else {
+            return new AttributeName[] {SPRINT, DATE_START, PLANNED_COMPLETION, DATE_END, DESCRIPTION};
+        }
+    }
+
+    @Override
+    protected List<Optional<SearchCriteria>> createListCriteria() {
+        List<Optional<SearchCriteria>> searchCriteria = new ArrayList<>();
+
+        searchCriteria.addAll(criteriaFromInterval(DATE_START, PLANNED_COMPLETION));
+        searchCriteria.addAll(criteriaFromComboBox(PROJECT, EXECUTION, COMPLEXITY));
+        searchCriteria.addAll(criteriaTextField(SPRINT));
+
+        return searchCriteria;
+    }
+
+    @Override
+    public ActionListener createGraph() {
+        return e -> {
+            List<AttributeName> variants = List.of(PROJECT, EXECUTION, COMPLEXITY);
+            createGraphUI(variants);
+        };
     }
 }

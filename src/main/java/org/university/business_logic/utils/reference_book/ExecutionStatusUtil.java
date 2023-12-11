@@ -1,8 +1,9 @@
 package org.university.business_logic.utils.reference_book;
 
 import org.jetbrains.annotations.NotNull;
-import org.university.business_logic.utils.ObjectName;
-import org.university.business_logic.abstracts.TableModelView;
+import org.university.business_logic.attribute_name.AttributeName;
+import org.university.business_logic.abstracts.ReferenceBookModelView;
+import org.university.business_logic.attribute_name.AttributeNameSimple;
 import org.university.entities.reference_book.ExecutionStatus;
 import org.university.business_logic.search_tools.SearchCriteria;
 import org.university.business_logic.search_tools.SearchOperation;
@@ -12,11 +13,11 @@ import org.university.exception.SelectedException;
 import javax.swing.*;
 import java.util.List;
 
-public class ExecutionStatusUtil extends TableModelView<ExecutionStatus> {
-    private static final ObjectName NAME_EXECUTION = new ObjectName("Стан виконання", "nameExecution");
+public class ExecutionStatusUtil extends ReferenceBookModelView<ExecutionStatus> {
+    private static final AttributeName NAME_EXECUTION = new AttributeNameSimple(0, "Стан виконання", "nameExecution");
 
     public ExecutionStatusUtil(){
-        titleColumns = List.of( NAME_EXECUTION.nameForUser() );
+        titleColumns = List.of( NAME_EXECUTION.getNameForUser() );
         nameTable = "Стани виконання";
     }
 
@@ -32,8 +33,8 @@ public class ExecutionStatusUtil extends TableModelView<ExecutionStatus> {
 
     @Override
     protected SearchCriteria[] criteriaToSearchEntities(@NotNull JTable table, int indexRow){
-        String value = (String)table.getValueAt(indexRow, 0);
-        return new SearchCriteria[]{ new SearchCriteria(NAME_EXECUTION.nameForSystem(), value, SearchOperation.EQUAL) };
+        var value = table.getValueAt(indexRow, NAME_EXECUTION.getId());
+        return new SearchCriteria[]{ new SearchCriteria(NAME_EXECUTION.getNameForSystem(), value, SearchOperation.EQUAL) };
     }
 
     @Override
@@ -42,7 +43,7 @@ public class ExecutionStatusUtil extends TableModelView<ExecutionStatus> {
             panelBody.removeAll();
         }
 
-        panelBody = windowComponent.createTextFieldInputPanel(NAME_EXECUTION);
+        panelBody = panelComponent.createTextFieldInputPanel(NAME_EXECUTION);
         return panelBody;
     }
 
@@ -54,7 +55,7 @@ public class ExecutionStatusUtil extends TableModelView<ExecutionStatus> {
     @Override
     protected SearchCriteria[] criteriaToSearchDuplicate(@NotNull ExecutionStatus entity) {
         return new SearchCriteria[]{
-                new SearchCriteria(NAME_EXECUTION.nameForSystem(), entity.getNameExecution(), SearchOperation.EQUAL)
+                new SearchCriteria(NAME_EXECUTION.getNameForSystem(), entity.getNameExecution(), SearchOperation.EQUAL)
         };
     }
 
@@ -75,6 +76,6 @@ public class ExecutionStatusUtil extends TableModelView<ExecutionStatus> {
     @Override
     protected void fillingFields() throws SelectedException {
         var entity = getSelectedEntity();
-        windowComponent.updateTextField(NAME_EXECUTION, entity.getNameExecution());
+        panelComponent.updateTextField(NAME_EXECUTION, entity.getNameExecution());
     }
 }

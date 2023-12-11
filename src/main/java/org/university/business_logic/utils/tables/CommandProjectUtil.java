@@ -1,28 +1,31 @@
 package org.university.business_logic.utils.tables;
 
 import org.jetbrains.annotations.NotNull;
-import org.university.business_logic.utils.ObjectName;
+import org.university.business_logic.abstracts.TableModelView;
+import org.university.business_logic.attribute_name.AttributeName;
 import org.university.business_logic.search_tools.SearchOperation;
+import org.university.business_logic.attribute_name.AttributeNameComboBox;
 import org.university.entities.tables.Employee;
 import org.university.entities.tables.Project;
-import org.university.business_logic.abstracts.TableModelView;
 import org.university.entities.tables.CommandProject;
 import org.university.business_logic.search_tools.SearchCriteria;
 import org.university.exception.CastingException;
 import org.university.exception.SelectedException;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class CommandProjectUtil extends TableModelView<CommandProject> {
-    private static final ObjectName PROJECT = new ObjectName("Проект", "project");
-    private static final ObjectName EMPLOYEE = new ObjectName("Працівник", "employee");
+    private static final AttributeName PROJECT = new AttributeNameComboBox(0, "Проект", "project", Project.class);
+    private static final AttributeName EMPLOYEE = new AttributeNameComboBox(1, "Працівник", "employee", Employee.class);
 
     public CommandProjectUtil(){
         titleColumns = List.of(
-                PROJECT.nameForUser(),
-                EMPLOYEE.nameForUser()
+                PROJECT.getNameForUser(),
+                EMPLOYEE.getNameForUser()
         );
         nameTable = "Команда проекту";
     }
@@ -42,42 +45,28 @@ public class CommandProjectUtil extends TableModelView<CommandProject> {
 
     @Override
     protected SearchCriteria[] criteriaToSearchEntities(@NotNull JTable table, int indexRow) {
-        Project project = (Project) table.getValueAt(indexRow, 0);
-        Employee employee = (Employee) table.getValueAt(indexRow, 1);
+        var project = table.getValueAt(indexRow, PROJECT.getId());
+        var employee = table.getValueAt(indexRow, EMPLOYEE.getId());
 
         return new SearchCriteria[] {
-                new SearchCriteria(PROJECT.nameForSystem(), project, SearchOperation.EQUAL),
-                new SearchCriteria(EMPLOYEE.nameForSystem(), employee, SearchOperation.EQUAL)
+                new SearchCriteria(PROJECT.getNameForSystem(), project, SearchOperation.EQUAL),
+                new SearchCriteria(EMPLOYEE.getNameForSystem(), employee, SearchOperation.EQUAL)
         };
     }
 
     @Override
     public JPanel dataEntryPanel() {
-        if(panelBody != null){
-            panelBody.removeAll();
-        }
-
-        panelBody = new JPanel();
-        panelBody.setLayout(new GridLayout(2,1));
-
-        panelBody.add(windowComponent.createComboBoxPanel(PROJECT, new ProjectUtil()));
-        panelBody.add(windowComponent.createComboBoxPanel(EMPLOYEE, new EmployeeUtil()));
-
-        panelBody = windowComponent.createScrollPanel(panelBody);
-
-        return panelBody;
+        return createPanel(false);
     }
 
     @Override
-    protected void checkCompletenessFields() throws SelectedException {
-        // TODO: 06.12.23 not required for this table
-    }
+    protected void checkCompletenessFields() throws SelectedException { /* TODO not required for this table */ }
 
     @Override
     protected SearchCriteria[] criteriaToSearchDuplicate(@NotNull CommandProject entity) {
         return new SearchCriteria[] {
-                new SearchCriteria(PROJECT.nameForSystem(), entity.getProject(), SearchOperation.EQUAL),
-                new SearchCriteria(EMPLOYEE.nameForSystem(), entity.getEmployee(), SearchOperation.EQUAL)
+                new SearchCriteria(PROJECT.getNameForSystem(), entity.getProject(), SearchOperation.EQUAL),
+                new SearchCriteria(EMPLOYEE.getNameForSystem(), entity.getEmployee(), SearchOperation.EQUAL)
         };
     }
 
@@ -101,7 +90,34 @@ public class CommandProjectUtil extends TableModelView<CommandProject> {
     protected void fillingFields() throws SelectedException {
         var entity = getSelectedEntity();
 
-        windowComponent.updateComboBox(PROJECT, entity.getProject());
-        windowComponent.updateComboBox(EMPLOYEE, entity.getEmployee());
+        panelComponent.updateComboBox(PROJECT, entity.getProject());
+        panelComponent.updateComboBox(EMPLOYEE, entity.getEmployee());
+    }
+
+    @Override
+    public JPanel selectEntryPanel() {
+        return createPanel(true);
+    }
+
+    private JPanel createPanel(boolean flag){
+        clearPanelBody();
+
+        List<JPanel> components = new ArrayList<>(createComboBoxPanels(flag, PROJECT, EMPLOYEE));
+        addAllComponentsToPanel(components);
+
+        return panelBody;
+    }
+
+    @Override
+    protected List<Optional<SearchCriteria>> createListCriteria() {
+        return new ArrayList<>(criteriaFromComboBox(PROJECT, EMPLOYEE));
+    }
+
+    @Override
+    public ActionListener createGraph() {
+        return e -> {
+            List<AttributeName> variants = List.of(PROJECT, EMPLOYEE);
+            createGraphUI(variants);
+        };
     }
 }

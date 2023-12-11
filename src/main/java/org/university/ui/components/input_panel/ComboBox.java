@@ -1,10 +1,11 @@
-package org.university.ui.components;
+package org.university.ui.components.input_panel;
 
 import org.jetbrains.annotations.NotNull;
 import org.university.business_logic.action_with_database.Select;
 import org.university.business_logic.search_tools.SearchCriteria;
 import org.university.business_logic.search_tools.SearchOperation;
-import org.university.business_logic.utils.ObjectName;
+import org.university.business_logic.attribute_name.AttributeName;
+import org.university.business_logic.attribute_name.AttributeNameComboBox;
 import org.university.entities.TableID;
 import org.university.exception.SelectedException;
 import org.university.ui.additional_tools.MessageWindow;
@@ -18,20 +19,23 @@ import java.util.Optional;
 
 public class ComboBox<T extends TableID> extends JComboBox<T> {
     private ComboBox<?> children;
-    private transient ObjectName nameColumnParent;
+    private transient AttributeName nameColumnParent;
     private final transient Select<T> select;
     private final DefaultComboBoxModel<T> model;
     private final transient ItemListener listener = this::updateChildren;
 
-    public ComboBox(Select<T> select){
-        this.select = select;
+    public ComboBox(@NotNull AttributeName name){
+        AttributeNameComboBox nameComboBox = (AttributeNameComboBox) name;
+        this.select = () -> (Class<T>) nameComboBox.getNameClass();
+
         model = new DefaultComboBoxModel<>();
         this.setModel(model);
         this.addItemListener(listener);
+        this.setName(name.getNameForSystem());
         init();
     }
 
-    public void setChildComboBox(ComboBox<?> children, ObjectName nameColumnParent){
+    public void setChildComboBox(ComboBox<?> children, AttributeName nameColumnParent){
         this.children = children;
         this.nameColumnParent = nameColumnParent;
         activeUpdate();
@@ -55,8 +59,8 @@ public class ComboBox<T extends TableID> extends JComboBox<T> {
         children.updateItem(item, nameColumnParent);
     }
 
-    private void updateItem(@NotNull TableID entity, @NotNull ObjectName nameColumn){
-        SearchCriteria searchCriteria = new SearchCriteria(nameColumn.nameForSystem(), entity, SearchOperation.EQUAL);
+    private void updateItem(@NotNull TableID entity, @NotNull AttributeName nameColumn){
+        SearchCriteria searchCriteria = new SearchCriteria(nameColumn.getNameForSystem(), entity, SearchOperation.EQUAL);
         init(searchCriteria);
     }
 

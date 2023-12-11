@@ -1,32 +1,34 @@
 package org.university.business_logic.utils.tables;
 
 import org.jetbrains.annotations.NotNull;
-import org.university.business_logic.utils.ObjectName;
+import org.university.business_logic.abstracts.TableModelView;
+import org.university.business_logic.attribute_name.AttributeName;
+import org.university.business_logic.attribute_name.AttributeNameComboBox;
 import org.university.entities.reference_book.AccessRight;
 import org.university.entities.tables.Employee;
 import org.university.entities.tables.EmployeeAccessRight;
 import org.university.entities.tables.Project;
 import org.university.business_logic.search_tools.SearchOperation;
-import org.university.business_logic.abstracts.TableModelView;
 import org.university.business_logic.search_tools.SearchCriteria;
-import org.university.business_logic.utils.reference_book.AccessRightUtil;
 import org.university.exception.CastingException;
 import org.university.exception.SelectedException;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class EmployeeAccessRightUtil extends TableModelView<EmployeeAccessRight> {
-    private static final ObjectName PROJECT = new ObjectName("Проект", "project");
-    private static final ObjectName EMPLOYEE = new ObjectName("Працівник", "employee");
-    private static final ObjectName ACCESS_RIGHT = new ObjectName("Право доступу", "accessRight");
+    private static final AttributeName PROJECT = new AttributeNameComboBox(0, "Проект", "project", Project.class);
+    private static final AttributeName EMPLOYEE = new AttributeNameComboBox(1, "Працівник", "employee", Employee.class);
+    private static final AttributeName ACCESS_RIGHT = new AttributeNameComboBox(2, "Право доступу", "accessRight", AccessRight.class);
 
     public EmployeeAccessRightUtil(){
         titleColumns = List.of(
-                PROJECT.nameForUser(),
-                EMPLOYEE.nameForUser(),
-                ACCESS_RIGHT.nameForUser()
+                PROJECT.getNameForUser(),
+                EMPLOYEE.getNameForUser(),
+                ACCESS_RIGHT.getNameForUser()
         );
         nameTable = "Права доступу працівника";
     }
@@ -47,33 +49,20 @@ public class EmployeeAccessRightUtil extends TableModelView<EmployeeAccessRight>
 
     @Override
     protected SearchCriteria[] criteriaToSearchEntities(@NotNull JTable table, int indexRow) {
-        Project project = (Project) table.getValueAt(indexRow, 0);
-        Employee employee = (Employee) table.getValueAt(indexRow, 1);
-        AccessRight accessRight = (AccessRight) table.getValueAt(indexRow, 2);
+        var project = table.getValueAt(indexRow, PROJECT.getId());
+        var employee = table.getValueAt(indexRow, EMPLOYEE.getId());
+        var accessRight = table.getValueAt(indexRow, ACCESS_RIGHT.getId());
 
         return new SearchCriteria[] {
-                new SearchCriteria(PROJECT.nameForSystem(), project, SearchOperation.EQUAL),
-                new SearchCriteria(EMPLOYEE.nameForSystem(), employee, SearchOperation.EQUAL),
-                new SearchCriteria(ACCESS_RIGHT.nameForSystem(), accessRight, SearchOperation.EQUAL)
+                new SearchCriteria(PROJECT.getNameForSystem(), project, SearchOperation.EQUAL),
+                new SearchCriteria(EMPLOYEE.getNameForSystem(), employee, SearchOperation.EQUAL),
+                new SearchCriteria(ACCESS_RIGHT.getNameForSystem(), accessRight, SearchOperation.EQUAL)
         };
     }
 
     @Override
     public JPanel dataEntryPanel() {
-        if(panelBody != null){
-            panelBody.removeAll();
-        }
-
-        panelBody = new JPanel();
-        panelBody.setLayout(new GridLayout(3, 1));
-
-        panelBody.add(windowComponent.createComboBoxPanel(PROJECT, new ProjectUtil()));
-        panelBody.add(windowComponent.createComboBoxPanel(EMPLOYEE, new EmployeeUtil()));
-        panelBody.add(windowComponent.createComboBoxPanel(ACCESS_RIGHT, new AccessRightUtil()));
-
-        panelBody = windowComponent.createScrollPanel(panelBody);
-
-        return panelBody;
+        return createPanel(false);
     }
 
     @Override
@@ -84,9 +73,9 @@ public class EmployeeAccessRightUtil extends TableModelView<EmployeeAccessRight>
     @Override
     protected SearchCriteria[] criteriaToSearchDuplicate(@NotNull EmployeeAccessRight entity) {
         return new SearchCriteria[] {
-                new SearchCriteria(PROJECT.nameForSystem(), entity.getProject(), SearchOperation.EQUAL),
-                new SearchCriteria(EMPLOYEE.nameForSystem(), entity.getEmployee(), SearchOperation.EQUAL),
-                new SearchCriteria(ACCESS_RIGHT.nameForSystem(), entity.getAccessRight(), SearchOperation.EQUAL)
+                new SearchCriteria(PROJECT.getNameForSystem(), entity.getProject(), SearchOperation.EQUAL),
+                new SearchCriteria(EMPLOYEE.getNameForSystem(), entity.getEmployee(), SearchOperation.EQUAL),
+                new SearchCriteria(ACCESS_RIGHT.getNameForSystem(), entity.getAccessRight(), SearchOperation.EQUAL)
         };
     }
 
@@ -112,8 +101,35 @@ public class EmployeeAccessRightUtil extends TableModelView<EmployeeAccessRight>
     protected void fillingFields() throws SelectedException {
         var entity = getSelectedEntity();
 
-        windowComponent.updateComboBox(PROJECT, entity.getProject());
-        windowComponent.updateComboBox(EMPLOYEE, entity.getEmployee());
-        windowComponent.updateComboBox(ACCESS_RIGHT, entity.getAccessRight());
+        panelComponent.updateComboBox(PROJECT, entity.getProject());
+        panelComponent.updateComboBox(EMPLOYEE, entity.getEmployee());
+        panelComponent.updateComboBox(ACCESS_RIGHT, entity.getAccessRight());
+    }
+
+    @Override
+    public JPanel selectEntryPanel() {
+        return createPanel(true);
+    }
+
+    private JPanel createPanel(boolean flag){
+        clearPanelBody();
+
+        List<JPanel> components = new ArrayList<>(createComboBoxPanels(flag, PROJECT, EMPLOYEE, ACCESS_RIGHT));
+        addAllComponentsToPanel(components);
+
+        return panelBody;
+    }
+
+    @Override
+    protected List<Optional<SearchCriteria>> createListCriteria() {
+        return new ArrayList<>(criteriaFromComboBox(PROJECT, EMPLOYEE, ACCESS_RIGHT));
+    }
+
+    @Override
+    public ActionListener createGraph() {
+        return e -> {
+            List<AttributeName> variants = List.of(PROJECT, EMPLOYEE, ACCESS_RIGHT);
+            createGraphUI(variants);
+        };
     }
 }

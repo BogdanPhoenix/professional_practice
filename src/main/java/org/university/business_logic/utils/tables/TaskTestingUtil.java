@@ -1,49 +1,51 @@
 package org.university.business_logic.utils.tables;
 
 import org.jetbrains.annotations.NotNull;
-import org.university.business_logic.utils.ObjectName;
-import org.university.business_logic.utils.reference_book.PriorityTaskUtil;
-import org.university.business_logic.utils.reference_book.StateTestingUtil;
+import org.university.business_logic.abstracts.TableModelView;
+import org.university.business_logic.attribute_name.AttributeName;
+import org.university.business_logic.attribute_name.AttributeNameComboBox;
+import org.university.business_logic.attribute_name.AttributeNameSimple;
 import org.university.entities.reference_book.PriorityTask;
 import org.university.entities.reference_book.StateTesting;
 import org.university.business_logic.search_tools.SearchOperation;
 import org.university.entities.tables.*;
-import org.university.business_logic.abstracts.TableModelView;
 import org.university.business_logic.search_tools.SearchCriteria;
 import org.university.exception.CastingException;
 import org.university.exception.SelectedException;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.event.ActionListener;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-public class TaskTestingUtil extends TableModelView<TaskTesting>{
-    private static final ObjectName PROJECT = new ObjectName("Проект", "project");
-    private static final ObjectName SPRINT = new ObjectName("Спринт", "sprint");
-    private static final ObjectName TASK = new ObjectName("Завдання", "task");
-    private static final ObjectName TASK_TESTING = new ObjectName("Тестове завдання", "nameTaskTesting");
-    private static final ObjectName PERFORMER = new ObjectName("Відповідальний", "performer");
-    private static final ObjectName STATE = new ObjectName("Виконання", "stateTesting");
-    private static final ObjectName PRIORITY = new ObjectName("Пріоритет", "priority");
-    private static final ObjectName DATE_START = new ObjectName("Дата старту виконання", "dateTimeCreate");
-    private static final ObjectName PLANNED_COMPLETION = new ObjectName("Запланована дата завершення", "plannedCompletionDate");
-    private static final ObjectName DATE_END = new ObjectName("Дата завершення", "dateTimeEnd");
-    private static final ObjectName DESCRIPTION = new ObjectName("Опис", "description");
+public class TaskTestingUtil extends TableModelView<TaskTesting> {
+    private static final AttributeName PROJECT = new AttributeNameComboBox(0, "Проект", "project", Project.class);
+    private static final AttributeName SPRINT = new AttributeNameComboBox(1, "Спринт", "sprint", Sprint.class);
+    private static final AttributeName TASK = new AttributeNameComboBox(2, "Завдання", "task", Task.class);
+    private static final AttributeName PERFORMER = new AttributeNameComboBox(3, "Відповідальний", "performer", Employee.class);
+    private static final AttributeName STATE = new AttributeNameComboBox(4, "Виконання", "stateTesting", StateTesting.class);
+    private static final AttributeName PRIORITY = new AttributeNameComboBox(5, "Пріоритет", "priority", PriorityTask.class);
+    private static final AttributeName TASK_TESTING = new AttributeNameSimple(6, "Тестове завдання", "nameTaskTesting");
+    private static final AttributeName DATE_START = new AttributeNameSimple(7, "Дата старту виконання", "dateTimeCreate");
+    private static final AttributeName PLANNED_COMPLETION = new AttributeNameSimple(8, "Запланована дата завершення", "plannedCompletionDate");
+    private static final AttributeName DATE_END = new AttributeNameSimple(9, "Дата завершення", "dateTimeEnd");
+    private static final AttributeName DESCRIPTION = new AttributeNameSimple(10, "Опис", "description");
 
     public TaskTestingUtil(){
         titleColumns = List.of(
-                PROJECT.nameForUser(),
-                SPRINT.nameForUser(),
-                TASK.nameForUser(),
-                TASK_TESTING.nameForUser(),
-                PERFORMER.nameForUser(),
-                STATE.nameForUser(),
-                PRIORITY.nameForUser(),
-                DATE_START.nameForUser(),
-                PLANNED_COMPLETION.nameForUser(),
-                DATE_END.nameForUser(),
-                DESCRIPTION.nameForUser()
+                PROJECT.getNameForUser(),
+                SPRINT.getNameForUser(),
+                TASK.getNameForUser(),
+                PERFORMER.getNameForUser(),
+                STATE.getNameForUser(),
+                PRIORITY.getNameForUser(),
+                TASK_TESTING.getNameForUser(),
+                DATE_START.getNameForUser(),
+                PLANNED_COMPLETION.getNameForUser(),
+                DATE_END.getNameForUser(),
+                DESCRIPTION.getNameForUser()
         );
         nameTable = "Завдання на тестування";
     }
@@ -63,10 +65,10 @@ public class TaskTestingUtil extends TableModelView<TaskTesting>{
                 project,
                 sprint,
                 task,
-                value.getNameTaskTesting(),
                 value.getPerformer(),
                 value.getStateTesting(),
                 value.getPriority(),
+                value.getNameTaskTesting(),
                 value.getDateTimeCreate(),
                 value.getPlannedCompletionDate(),
                 value.getDateTimeEnd(),
@@ -76,41 +78,24 @@ public class TaskTestingUtil extends TableModelView<TaskTesting>{
 
     @Override
     protected SearchCriteria[] criteriaToSearchEntities(@NotNull JTable table, int indexRow) {
-        var task = table.getValueAt(indexRow, 2);
-        var nameTaskTesting = table.getValueAt(indexRow, 3);
+        var task = table.getValueAt(indexRow, TASK.getId());
+        var nameTaskTesting = table.getValueAt(indexRow, TASK_TESTING.getId());
 
         return new SearchCriteria[] {
-                new SearchCriteria(TASK.nameForSystem(), task, SearchOperation.EQUAL),
-                new SearchCriteria(TASK_TESTING.nameForSystem(), nameTaskTesting, SearchOperation.EQUAL)
+                new SearchCriteria(TASK.getNameForSystem(), task, SearchOperation.EQUAL),
+                new SearchCriteria(TASK_TESTING.getNameForSystem(), nameTaskTesting, SearchOperation.EQUAL)
         };
     }
 
     @Override
     public JPanel dataEntryPanel() {
-        if(panelBody != null) {
-            panelBody.removeAll();
-        }
+        clearPanelBody();
 
-        panelBody = new JPanel();
-        panelBody.setLayout(new GridLayout(11, 1));
-
-        var task = windowComponent.createComboBoxPanel(TASK, new TaskUtil());
-        var sprint = windowComponent.createComboBoxPanel(SPRINT, new SprintUtil(), TASK);
-        var project = windowComponent.createComboBoxPanel(PROJECT, new ProjectUtil(), SPRINT);
-
-        panelBody.add(project);
-        panelBody.add(sprint);
-        panelBody.add(task);
-        panelBody.add(windowComponent.createTextFieldInputPanel(TASK_TESTING));
-        panelBody.add(windowComponent.createComboBoxPanel(PERFORMER, new EmployeeUtil()));
-        panelBody.add(windowComponent.createComboBoxPanel(STATE, new StateTestingUtil()));
-        panelBody.add(windowComponent.createComboBoxPanel(PRIORITY, new PriorityTaskUtil()));
-        panelBody.add(windowComponent.createTextFieldInputPanel(DATE_START));
-        panelBody.add(windowComponent.createTextFieldInputPanel(PLANNED_COMPLETION));
-        panelBody.add(windowComponent.createTextFieldInputPanel(DATE_END));
-        panelBody.add(windowComponent.createTextFieldInputPanel(DESCRIPTION));
-
-        panelBody = windowComponent.createScrollPanel(panelBody);
+        List<JPanel> components = new ArrayList<>();
+        components.addAll(createCoherentComboBoxPanels(PROJECT, SPRINT, TASK));
+        components.addAll(createComboBoxPanels(false, PERFORMER, STATE, PRIORITY));
+        components.addAll(createTextFieldPanels(false, TASK_TESTING, DATE_START, PLANNED_COMPLETION, DATE_END, DESCRIPTION));
+        addAllComponentsToPanel(components);
 
         return panelBody;
     }
@@ -124,7 +109,7 @@ public class TaskTestingUtil extends TableModelView<TaskTesting>{
         if(nameTask.isEmpty() || dateStart.isEmpty() || plannedCompletion.isEmpty()){
             throw new SelectedException(String.format(
                     "Одне з наступних обов'язкових полів не заповнене: %n%s %n%s %n%s",
-                    TASK_TESTING.nameForUser(), DATE_START.nameForUser(), PLANNED_COMPLETION.nameForUser()
+                    TASK_TESTING.getNameForUser(), DATE_START.getNameForUser(), PLANNED_COMPLETION.getNameForUser()
             ));
         }
     }
@@ -132,8 +117,8 @@ public class TaskTestingUtil extends TableModelView<TaskTesting>{
     @Override
     protected SearchCriteria[] criteriaToSearchDuplicate(@NotNull TaskTesting entity) {
         return new SearchCriteria[] {
-                new SearchCriteria(TASK.nameForSystem(), entity.getTask(), SearchOperation.EQUAL),
-                new SearchCriteria(TASK_TESTING.nameForSystem(), entity.getNameTaskTesting(), SearchOperation.EQUAL)
+                new SearchCriteria(TASK.getNameForSystem(), entity.getTask(), SearchOperation.EQUAL),
+                new SearchCriteria(TASK_TESTING.getNameForSystem(), entity.getNameTaskTesting(), SearchOperation.EQUAL)
         };
     }
 
@@ -176,17 +161,49 @@ public class TaskTestingUtil extends TableModelView<TaskTesting>{
         var projectEntity = sprintEntity.getProject();
         String dateEnd = convertFromTimestampToString(entity.getDateTimeEnd());
 
-        windowComponent.updateComboBox(PROJECT, projectEntity);
-        windowComponent.updateComboBox(SPRINT, sprintEntity);
-        windowComponent.updateComboBox(TASK, entity.getTask());
-        windowComponent.updateComboBox(PERFORMER, entity.getPerformer());
-        windowComponent.updateComboBox(STATE, entity.getStateTesting());
-        windowComponent.updateComboBox(PRIORITY, entity.getPriority());
+        panelComponent.updateComboBox(PROJECT, projectEntity);
+        panelComponent.updateComboBox(SPRINT, sprintEntity);
+        panelComponent.updateComboBox(TASK, entity.getTask());
+        panelComponent.updateComboBox(PERFORMER, entity.getPerformer());
+        panelComponent.updateComboBox(STATE, entity.getStateTesting());
+        panelComponent.updateComboBox(PRIORITY, entity.getPriority());
 
-        windowComponent.updateTextField(TASK_TESTING, entity.getNameTaskTesting());
-        windowComponent.updateTextField(DATE_START, entity.getDateTimeCreate().toString());
-        windowComponent.updateTextField(PLANNED_COMPLETION, entity.getPlannedCompletionDate().toString());
-        windowComponent.updateTextField(DATE_END, dateEnd);
-        windowComponent.updateTextField(DESCRIPTION, entity.getDescription());
+        panelComponent.updateTextField(TASK_TESTING, entity.getNameTaskTesting());
+        panelComponent.updateTextField(DATE_START, entity.getDateTimeCreate().toString());
+        panelComponent.updateTextField(PLANNED_COMPLETION, entity.getPlannedCompletionDate().toString());
+        panelComponent.updateTextField(DATE_END, dateEnd);
+        panelComponent.updateTextField(DESCRIPTION, entity.getDescription());
+    }
+
+    @Override
+    public JPanel selectEntryPanel() {
+        clearPanelBody();
+
+        List<JPanel> components = new ArrayList<>();
+        components.addAll(createIntervalPanels(DATE_START, PLANNED_COMPLETION));
+        components.addAll(createComboBoxPanels(true, TASK, PERFORMER, STATE, PRIORITY));
+        components.addAll(createTextFieldPanels(true, TASK_TESTING));
+        addAllComponentsToPanel(components);
+
+        return panelBody;
+    }
+
+    @Override
+    protected List<Optional<SearchCriteria>> createListCriteria() {
+        List<Optional<SearchCriteria>> searchCriteria = new ArrayList<>();
+
+        searchCriteria.addAll(criteriaFromInterval(DATE_START, PLANNED_COMPLETION));
+        searchCriteria.addAll(criteriaFromComboBox(TASK, PERFORMER, STATE, PRIORITY));
+        searchCriteria.addAll(criteriaTextField(TASK_TESTING));
+
+        return searchCriteria;
+    }
+
+    @Override
+    public ActionListener createGraph() {
+        return e -> {
+            List<AttributeName> variants = List.of(PROJECT, SPRINT, TASK, PERFORMER, STATE, PRIORITY);
+            createGraphUI(variants);
+        };
     }
 }

@@ -1,14 +1,14 @@
 package org.university.ui.control_panel.realization;
 
-import org.jetbrains.annotations.NotNull;
-import org.university.business_logic.abstracts.TableModelView;
+import org.university.business_logic.abstracts.ReferenceBookModelView;
 import org.university.business_logic.abstracts.UpdateModelView;
 import org.university.ui.mediator.interfaces.Mediator;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.event.ActionListener;
+import java.util.List;
 
-public class UpdatePanel extends InsertPanel {
+public class UpdatePanel extends ControlPanelImpl {
     private UpdateModelView<?> modelView;
 
     public UpdatePanel(Mediator mediator) {
@@ -21,42 +21,28 @@ public class UpdatePanel extends InsertPanel {
     }
 
     @Override
-    protected @NotNull JPanel createPanelButton(){
-        JPanel panel = new JPanel(new BorderLayout());
+    protected ActionListener getCommand() {
+        return modelView.commandUpdate();
+    }
 
-        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-        panel.setPreferredSize(SIZE_PANEL_BUTTON);
-        panel.setMaximumSize(SIZE_PANEL_BUTTON);
-        panel.setMinimumSize(SIZE_PANEL_BUTTON);
+    @Override
+    protected JPanel getEntryPanel() {
+        return modelView.dataEntryPanel();
+    }
 
+    @Override
+    public void setModelView(ReferenceBookModelView<?> modelView) {
+        this.modelView = modelView;
+    }
+
+    @Override
+    protected List<JButton> createButtons() {
         JButton select = new JButton("Обрати");
         select.addActionListener(modelView.selectEntity());
 
         button = new JButton("Оновити");
         button.addActionListener(updateTable());
 
-        panel.add(select);
-        panel.add(button);
-        panel.setBorder(HORIZONTAL_BORDER);
-
-        return panel;
-    }
-
-    @Override
-    protected void updateButtonLogic(){
-        button.removeActionListener(command);
-        command = modelView.commandUpdate();
-        button.addActionListener(command);
-    }
-
-    @Override
-    protected void updateDataEntryPanel(@NotNull JPanel controlPanel){
-        controlPanel.remove(dataEntryPanel);
-        dataEntryPanel = modelView.dataEntryPanel();
-    }
-
-    @Override
-    public void setModelView(TableModelView<?> modelView) {
-        this.modelView = modelView;
+        return List.of(select, button);
     }
 }

@@ -1,9 +1,10 @@
 package org.university.business_logic.utils.reference_book;
 
 import org.jetbrains.annotations.NotNull;
-import org.university.business_logic.utils.ObjectName;
+import org.university.business_logic.attribute_name.AttributeName;
 import org.university.business_logic.search_tools.SearchOperation;
-import org.university.business_logic.abstracts.TableModelView;
+import org.university.business_logic.abstracts.ReferenceBookModelView;
+import org.university.business_logic.attribute_name.AttributeNameSimple;
 import org.university.entities.reference_book.FileExtension;
 import org.university.business_logic.search_tools.SearchCriteria;
 import org.university.exception.CastingException;
@@ -12,11 +13,11 @@ import org.university.exception.SelectedException;
 import javax.swing.*;
 import java.util.List;
 
-public class FileExtensionUtil extends TableModelView<FileExtension> {
-    private static final ObjectName NAME_EXTENSION = new ObjectName("Розширення файлу", "nameExtension");
+public class FileExtensionUtil extends ReferenceBookModelView<FileExtension> {
+    private static final AttributeName NAME_EXTENSION = new AttributeNameSimple(0, "Розширення файлу", "nameExtension");
 
     public FileExtensionUtil(){
-        titleColumns = List.of(NAME_EXTENSION.nameForUser());
+        titleColumns = List.of(NAME_EXTENSION.getNameForUser());
         nameTable = "Розширення файлів";
     }
 
@@ -32,8 +33,8 @@ public class FileExtensionUtil extends TableModelView<FileExtension> {
 
     @Override
     protected SearchCriteria[] criteriaToSearchEntities(@NotNull JTable table, int indexRow){
-        String value = (String)table.getValueAt(indexRow, 0);
-        return new SearchCriteria[]{ new SearchCriteria(NAME_EXTENSION.nameForSystem(), value, SearchOperation.EQUAL) };
+        var value = table.getValueAt(indexRow, NAME_EXTENSION.getId());
+        return new SearchCriteria[]{ new SearchCriteria(NAME_EXTENSION.getNameForSystem(), value, SearchOperation.EQUAL) };
     }
 
     @Override
@@ -42,7 +43,7 @@ public class FileExtensionUtil extends TableModelView<FileExtension> {
             panelBody.removeAll();
         }
 
-        panelBody = windowComponent.createTextFieldInputPanel(NAME_EXTENSION);
+        panelBody = panelComponent.createTextFieldInputPanel(NAME_EXTENSION);
         return panelBody;
     }
 
@@ -54,7 +55,7 @@ public class FileExtensionUtil extends TableModelView<FileExtension> {
     @Override
     protected SearchCriteria[] criteriaToSearchDuplicate(@NotNull FileExtension entity) {
         return new SearchCriteria[]{
-                new SearchCriteria(NAME_EXTENSION.nameForSystem(), entity.getNameExtension(), SearchOperation.EQUAL)
+                new SearchCriteria(NAME_EXTENSION.getNameForSystem(), entity.getNameExtension(), SearchOperation.EQUAL)
         };
     }
 
@@ -75,6 +76,6 @@ public class FileExtensionUtil extends TableModelView<FileExtension> {
     @Override
     protected void fillingFields() throws SelectedException {
         var entity = getSelectedEntity();
-        windowComponent.updateTextField(NAME_EXTENSION, entity.getNameExtension());
+        panelComponent.updateTextField(NAME_EXTENSION, entity.getNameExtension());
     }
 }

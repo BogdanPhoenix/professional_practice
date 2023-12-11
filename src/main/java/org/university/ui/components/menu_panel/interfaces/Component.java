@@ -1,4 +1,4 @@
-package org.university.ui.components.interfaces;
+package org.university.ui.components.menu_panel.interfaces;
 
 import org.university.ui.mediator.interfaces.Mediator;
 

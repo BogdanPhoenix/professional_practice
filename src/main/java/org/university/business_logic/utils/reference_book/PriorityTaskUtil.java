@@ -1,9 +1,10 @@
 package org.university.business_logic.utils.reference_book;
 
 import org.jetbrains.annotations.NotNull;
-import org.university.business_logic.utils.ObjectName;
+import org.university.business_logic.attribute_name.AttributeName;
 import org.university.business_logic.search_tools.SearchOperation;
-import org.university.business_logic.abstracts.TableModelView;
+import org.university.business_logic.abstracts.ReferenceBookModelView;
+import org.university.business_logic.attribute_name.AttributeNameSimple;
 import org.university.entities.reference_book.PriorityTask;
 import org.university.business_logic.search_tools.SearchCriteria;
 import org.university.exception.CastingException;
@@ -12,11 +13,11 @@ import org.university.exception.SelectedException;
 import javax.swing.*;
 import java.util.List;
 
-public class PriorityTaskUtil extends TableModelView<PriorityTask> {
-    private static final ObjectName NAME_PRIORITY = new ObjectName("Пріоритет завдання", "namePriority");
+public class PriorityTaskUtil extends ReferenceBookModelView<PriorityTask> {
+    private static final AttributeName NAME_PRIORITY = new AttributeNameSimple(0, "Пріоритет завдання", "namePriority");
 
     public PriorityTaskUtil(){
-        titleColumns = List.of(NAME_PRIORITY.nameForUser());
+        titleColumns = List.of(NAME_PRIORITY.getNameForUser());
         nameTable = "Пріоритети завдання";
     }
 
@@ -32,8 +33,8 @@ public class PriorityTaskUtil extends TableModelView<PriorityTask> {
 
     @Override
     protected SearchCriteria[] criteriaToSearchEntities(@NotNull JTable table, int indexRow){
-        String value = (String)table.getValueAt(indexRow, 0);
-        return new SearchCriteria[]{ new SearchCriteria(NAME_PRIORITY.nameForSystem(), value, SearchOperation.EQUAL) };
+        var value = table.getValueAt(indexRow, NAME_PRIORITY.getId());
+        return new SearchCriteria[]{ new SearchCriteria(NAME_PRIORITY.getNameForSystem(), value, SearchOperation.EQUAL) };
     }
 
     @Override
@@ -42,7 +43,7 @@ public class PriorityTaskUtil extends TableModelView<PriorityTask> {
             panelBody.removeAll();
         }
 
-        panelBody = windowComponent.createTextFieldInputPanel(NAME_PRIORITY);
+        panelBody = panelComponent.createTextFieldInputPanel(NAME_PRIORITY);
         return panelBody;
     }
 
@@ -54,7 +55,7 @@ public class PriorityTaskUtil extends TableModelView<PriorityTask> {
     @Override
     protected SearchCriteria[] criteriaToSearchDuplicate(@NotNull PriorityTask entity) {
         return new SearchCriteria[]{
-                new SearchCriteria(NAME_PRIORITY.nameForSystem(), entity.getNamePriority(), SearchOperation.EQUAL)
+                new SearchCriteria(NAME_PRIORITY.getNameForSystem(), entity.getNamePriority(), SearchOperation.EQUAL)
         };
     }
 
@@ -75,6 +76,6 @@ public class PriorityTaskUtil extends TableModelView<PriorityTask> {
     @Override
     protected void fillingFields() throws SelectedException {
         var entity = getSelectedEntity();
-        windowComponent.updateTextField(NAME_PRIORITY, entity.getNamePriority());
+        panelComponent.updateTextField(NAME_PRIORITY, entity.getNamePriority());
     }
 }

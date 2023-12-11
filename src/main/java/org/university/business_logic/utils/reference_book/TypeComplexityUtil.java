@@ -1,10 +1,11 @@
 package org.university.business_logic.utils.reference_book;
 
 import org.jetbrains.annotations.NotNull;
-import org.university.business_logic.utils.ObjectName;
+import org.university.business_logic.attribute_name.AttributeName;
+import org.university.business_logic.attribute_name.AttributeNameSimple;
 import org.university.entities.reference_book.TypeComplexity;
 import org.university.business_logic.search_tools.SearchOperation;
-import org.university.business_logic.abstracts.TableModelView;
+import org.university.business_logic.abstracts.ReferenceBookModelView;
 import org.university.business_logic.search_tools.SearchCriteria;
 import org.university.exception.CastingException;
 import org.university.exception.SelectedException;
@@ -13,14 +14,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-public class TypeComplexityUtil extends TableModelView<TypeComplexity> {
-    private static final ObjectName NAME_COMPLEXITY = new ObjectName("Назва", "nameComplexity");
-    private static final ObjectName NUMBER_VALUE = new ObjectName("Числовий еквівалент", "numberValue");
+public class TypeComplexityUtil extends ReferenceBookModelView<TypeComplexity> {
+    private static final AttributeName NAME_COMPLEXITY = new AttributeNameSimple(0, "Назва", "nameComplexity");
+    private static final AttributeName NUMBER_VALUE = new AttributeNameSimple(1, "Числовий еквівалент", "numberValue");
 
     public TypeComplexityUtil(){
         titleColumns = List.of(
-                NAME_COMPLEXITY.nameForUser(),
-                NUMBER_VALUE.nameForUser()
+                NAME_COMPLEXITY.getNameForUser(),
+                NUMBER_VALUE.getNameForUser()
         );
         nameTable = "Типи складності";
     }
@@ -40,12 +41,12 @@ public class TypeComplexityUtil extends TableModelView<TypeComplexity> {
 
     @Override
     protected SearchCriteria[] criteriaToSearchEntities(@NotNull JTable table, int indexRow) {
-        String name = (String) table.getValueAt(indexRow, 0);
-        Integer num = (Integer) table.getValueAt(indexRow, 1);
+        var name = table.getValueAt(indexRow, NAME_COMPLEXITY.getId());
+        var num = table.getValueAt(indexRow, NUMBER_VALUE.getId());
 
         return new SearchCriteria[]{
-                new SearchCriteria(NAME_COMPLEXITY.nameForSystem(), name, SearchOperation.EQUAL),
-                new SearchCriteria(NUMBER_VALUE.nameForSystem(), num, SearchOperation.EQUAL)
+                new SearchCriteria(NAME_COMPLEXITY.getNameForSystem(), name, SearchOperation.EQUAL),
+                new SearchCriteria(NUMBER_VALUE.getNameForSystem(), num, SearchOperation.EQUAL)
         };
     }
 
@@ -58,10 +59,10 @@ public class TypeComplexityUtil extends TableModelView<TypeComplexity> {
         panelBody = new JPanel();
         panelBody.setLayout(new GridLayout(2, 1));
 
-        panelBody.add(windowComponent.createTextFieldInputPanel(NAME_COMPLEXITY));
-        panelBody.add(windowComponent.createTextFieldInputPanel(NUMBER_VALUE));
+        panelBody.add(panelComponent.createTextFieldInputPanel(NAME_COMPLEXITY));
+        panelBody.add(panelComponent.createTextFieldInputPanel(NUMBER_VALUE));
 
-        panelBody = windowComponent.createScrollPanel(panelBody);
+        panelBody = panelComponent.createScrollPanel(panelBody);
 
         return panelBody;
     }
@@ -74,7 +75,7 @@ public class TypeComplexityUtil extends TableModelView<TypeComplexity> {
         if(nameComplexity.isEmpty() || numValue.isEmpty()){
             throw new SelectedException(String.format(
                     "Одне з наступних обов'язкових полів не заповнене: %n%s %n%s %n",
-                    NAME_COMPLEXITY.nameForUser(), NUMBER_VALUE.nameForUser()
+                    NAME_COMPLEXITY.getNameForUser(), NUMBER_VALUE.getNameForUser()
             ));
         }
     }
@@ -82,7 +83,7 @@ public class TypeComplexityUtil extends TableModelView<TypeComplexity> {
     @Override
     protected SearchCriteria[] criteriaToSearchDuplicate(@NotNull TypeComplexity entity) {
         return new SearchCriteria[]{
-                new SearchCriteria(NAME_COMPLEXITY.nameForSystem(), entity.getNameComplexity(), SearchOperation.EQUAL)
+                new SearchCriteria(NAME_COMPLEXITY.getNameForSystem(), entity.getNameComplexity(), SearchOperation.EQUAL)
         };
     }
 
@@ -105,7 +106,7 @@ public class TypeComplexityUtil extends TableModelView<TypeComplexity> {
     @Override
     protected void fillingFields() throws SelectedException {
         var entity = getSelectedEntity();
-        windowComponent.updateTextField(NAME_COMPLEXITY, entity.getNameComplexity());
-        windowComponent.updateTextField(NUMBER_VALUE, String.valueOf(entity.getNumberValue()));
+        panelComponent.updateTextField(NAME_COMPLEXITY, entity.getNameComplexity());
+        panelComponent.updateTextField(NUMBER_VALUE, String.valueOf(entity.getNumberValue()));
     }
 }

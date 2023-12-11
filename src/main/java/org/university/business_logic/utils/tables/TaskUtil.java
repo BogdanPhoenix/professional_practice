@@ -1,10 +1,10 @@
 package org.university.business_logic.utils.tables;
 
 import org.jetbrains.annotations.NotNull;
-import org.university.business_logic.utils.ObjectName;
-import org.university.business_logic.utils.reference_book.ExecutionStatusUtil;
-import org.university.business_logic.utils.reference_book.PriorityTaskUtil;
-import org.university.business_logic.utils.reference_book.TypeComplexityUtil;
+import org.university.business_logic.abstracts.TableModelView;
+import org.university.business_logic.attribute_name.AttributeName;
+import org.university.business_logic.attribute_name.AttributeNameComboBox;
+import org.university.business_logic.attribute_name.AttributeNameSimple;
 import org.university.entities.reference_book.ExecutionStatus;
 import org.university.entities.reference_book.PriorityTask;
 import org.university.entities.reference_book.TypeComplexity;
@@ -13,42 +13,43 @@ import org.university.entities.tables.Project;
 import org.university.entities.tables.Sprint;
 import org.university.entities.tables.Task;
 import org.university.business_logic.search_tools.SearchOperation;
-import org.university.business_logic.abstracts.TableModelView;
 import org.university.business_logic.search_tools.SearchCriteria;
 import org.university.exception.CastingException;
 import org.university.exception.SelectedException;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.event.ActionListener;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class TaskUtil extends TableModelView<Task> {
-    private static final ObjectName PROJECT = new ObjectName("Проект", "project");
-    private static final ObjectName SPRINT = new ObjectName("Спринт", "sprint");
-    private static final ObjectName TASK = new ObjectName("Завдання", "nameTask");
-    private static final ObjectName PERFORMER = new ObjectName("Відповідальний", "performer");
-    private static final ObjectName EXECUTION = new ObjectName("Виконання", "executionStatus");
-    private static final ObjectName PRIORITY = new ObjectName("Пріоритет", "priority");
-    private static final ObjectName COMPLEXITY = new ObjectName("Складність", "complexity");
-    private static final ObjectName DATE_START = new ObjectName("Дата старту виконання", "dateTimeCreate");
-    private static final ObjectName PLANNED_COMPLETION = new ObjectName("Запланована дата завершення", "planned_completion_date");
-    private static final ObjectName DATE_END = new ObjectName("Дата завершення", "dateTimeEnd");
-    private static final ObjectName DESCRIPTION = new ObjectName("Опис", "description");
+    private static final AttributeName PROJECT = new AttributeNameComboBox(0, "Проект", "project", Project.class);
+    private static final AttributeName SPRINT = new AttributeNameComboBox(1, "Спринт", "sprint", Sprint.class);
+    private static final AttributeName PERFORMER = new AttributeNameComboBox(2, "Відповідальний", "performer", Employee.class);
+    private static final AttributeName EXECUTION = new AttributeNameComboBox(3, "Виконання", "executionStatus", ExecutionStatus.class);
+    private static final AttributeName PRIORITY = new AttributeNameComboBox(4, "Пріоритет", "priority", PriorityTask.class);
+    private static final AttributeName COMPLEXITY = new AttributeNameComboBox(5, "Складність", "complexity", TypeComplexity.class);
+    private static final AttributeName TASK = new AttributeNameSimple(6, "Завдання", "nameTask");
+    private static final AttributeName DATE_START = new AttributeNameSimple(7, "Дата старту виконання", "dateTimeCreate");
+    private static final AttributeName PLANNED_COMPLETION = new AttributeNameSimple(8, "Запланована дата завершення", "planned_completion_date");
+    private static final AttributeName DATE_END = new AttributeNameSimple(9, "Дата завершення", "dateTimeEnd");
+    private static final AttributeName DESCRIPTION = new AttributeNameSimple(10, "Опис", "description");
 
     public TaskUtil(){
         titleColumns = List.of(
-                PROJECT.nameForUser(),
-                SPRINT.nameForUser(),
-                TASK.nameForUser(),
-                PERFORMER.nameForUser(),
-                EXECUTION.nameForUser(),
-                PRIORITY.nameForUser(),
-                COMPLEXITY.nameForUser(),
-                DATE_START.nameForUser(),
-                PLANNED_COMPLETION.nameForUser(),
-                DATE_END.nameForUser(),
-                DESCRIPTION.nameForUser()
+                PROJECT.getNameForUser(),
+                SPRINT.getNameForUser(),
+                PERFORMER.getNameForUser(),
+                EXECUTION.getNameForUser(),
+                PRIORITY.getNameForUser(),
+                COMPLEXITY.getNameForUser(),
+                TASK.getNameForUser(),
+                DATE_START.getNameForUser(),
+                PLANNED_COMPLETION.getNameForUser(),
+                DATE_END.getNameForUser(),
+                DESCRIPTION.getNameForUser()
         );
         nameTable = "Завдання";
     }
@@ -66,11 +67,11 @@ public class TaskUtil extends TableModelView<Task> {
         return new Object[]{
                 project,
                 sprint,
-                value.getNameTask(),
                 value.getPerformer(),
                 value.getExecutionStatus(),
                 value.getPriority(),
                 value.getComplexity(),
+                value.getNameTask(),
                 value.getDateTimeCreate(),
                 value.getPlannedCompletionDate(),
                 value.getDateTimeEnd(),
@@ -80,40 +81,24 @@ public class TaskUtil extends TableModelView<Task> {
 
     @Override
     protected SearchCriteria[] criteriaToSearchEntities(@NotNull JTable table, int indexRow) {
-        var sprint = table.getValueAt(indexRow, 1);
-        var nameTask = table.getValueAt(indexRow, 2);
+        var sprint = table.getValueAt(indexRow, SPRINT.getId());
+        var nameTask = table.getValueAt(indexRow, TASK.getId());
 
         return new SearchCriteria[] {
-                new SearchCriteria(SPRINT.nameForSystem(), sprint, SearchOperation.EQUAL),
-                new SearchCriteria(TASK.nameForSystem(), nameTask, SearchOperation.EQUAL)
+                new SearchCriteria(SPRINT.getNameForSystem(), sprint, SearchOperation.EQUAL),
+                new SearchCriteria(TASK.getNameForSystem(), nameTask, SearchOperation.EQUAL)
         };
     }
 
     @Override
     public JPanel dataEntryPanel() {
-        if(panelBody != null) {
-            panelBody.removeAll();
-        }
+        clearPanelBody();
 
-        panelBody = new JPanel();
-        panelBody.setLayout(new GridLayout(11, 1));
-
-        var sprint = windowComponent.createComboBoxPanel(SPRINT, new SprintUtil());
-        var project = windowComponent.createComboBoxPanel(PROJECT, new ProjectUtil(), SPRINT);
-
-        panelBody.add(project);
-        panelBody.add(sprint);
-        panelBody.add(windowComponent.createTextFieldInputPanel(TASK));
-        panelBody.add(windowComponent.createComboBoxPanel(PERFORMER, new EmployeeUtil()));
-        panelBody.add(windowComponent.createComboBoxPanel(EXECUTION, new ExecutionStatusUtil()));
-        panelBody.add(windowComponent.createComboBoxPanel(PRIORITY, new PriorityTaskUtil()));
-        panelBody.add(windowComponent.createComboBoxPanel(COMPLEXITY, new TypeComplexityUtil()));
-        panelBody.add(windowComponent.createTextFieldInputPanel(DATE_START));
-        panelBody.add(windowComponent.createTextFieldInputPanel(PLANNED_COMPLETION));
-        panelBody.add(windowComponent.createTextFieldInputPanel(DATE_END));
-        panelBody.add(windowComponent.createTextFieldInputPanel(DESCRIPTION));
-
-        panelBody = windowComponent.createScrollPanel(panelBody);
+        List<JPanel> components = new ArrayList<>();
+        components.addAll(createCoherentComboBoxPanels(PROJECT, SPRINT));
+        components.addAll(createComboBoxPanels(false, PERFORMER, EXECUTION, PRIORITY, COMPLEXITY));
+        components.addAll(createTextFieldPanels(false, TASK, DATE_START, PLANNED_COMPLETION, DATE_END, DESCRIPTION));
+        addAllComponentsToPanel(components);
 
         return panelBody;
     }
@@ -127,7 +112,7 @@ public class TaskUtil extends TableModelView<Task> {
         if(nameTask.isEmpty() || dateStart.isEmpty() || plannedCompletion.isEmpty()){
             throw new SelectedException(String.format(
                     "Одне з наступних обов'язкових полів не заповнене: %n%s %n%s %n%s",
-                    TASK.nameForUser(), DATE_START.nameForUser(), PLANNED_COMPLETION.nameForUser()
+                    TASK.getNameForUser(), DATE_START.getNameForUser(), PLANNED_COMPLETION.getNameForUser()
             ));
         }
     }
@@ -135,8 +120,8 @@ public class TaskUtil extends TableModelView<Task> {
     @Override
     protected SearchCriteria[] criteriaToSearchDuplicate(@NotNull Task entity) {
         return new SearchCriteria[] {
-                new SearchCriteria(SPRINT.nameForSystem(), entity.getSprint(), SearchOperation.EQUAL),
-                new SearchCriteria(TASK.nameForSystem(), entity.getNameTask(), SearchOperation.EQUAL)
+                new SearchCriteria(SPRINT.getNameForSystem(), entity.getSprint(), SearchOperation.EQUAL),
+                new SearchCriteria(TASK.getNameForSystem(), entity.getNameTask(), SearchOperation.EQUAL)
         };
     }
 
@@ -179,17 +164,49 @@ public class TaskUtil extends TableModelView<Task> {
         var entity = getSelectedEntity();
         String dateEnd = convertFromTimestampToString(entity.getDateTimeEnd());
 
-        windowComponent.updateComboBox(PROJECT, entity.getSprint().getProject());
-        windowComponent.updateComboBox(SPRINT, entity.getSprint());
-        windowComponent.updateComboBox(PERFORMER, entity.getPerformer());
-        windowComponent.updateComboBox(EXECUTION, entity.getExecutionStatus());
-        windowComponent.updateComboBox(PRIORITY, entity.getPriority());
-        windowComponent.updateComboBox(COMPLEXITY, entity.getComplexity());
+        panelComponent.updateComboBox(PROJECT, entity.getSprint().getProject());
+        panelComponent.updateComboBox(SPRINT, entity.getSprint());
+        panelComponent.updateComboBox(PERFORMER, entity.getPerformer());
+        panelComponent.updateComboBox(EXECUTION, entity.getExecutionStatus());
+        panelComponent.updateComboBox(PRIORITY, entity.getPriority());
+        panelComponent.updateComboBox(COMPLEXITY, entity.getComplexity());
 
-        windowComponent.updateTextField(TASK, entity.getNameTask());
-        windowComponent.updateTextField(DATE_START, entity.getDateTimeCreate().toString());
-        windowComponent.updateTextField(PLANNED_COMPLETION, entity.getPlannedCompletionDate().toString());
-        windowComponent.updateTextField(DATE_END, dateEnd);
-        windowComponent.updateTextField(DESCRIPTION, entity.getDescription());
+        panelComponent.updateTextField(TASK, entity.getNameTask());
+        panelComponent.updateTextField(DATE_START, entity.getDateTimeCreate().toString());
+        panelComponent.updateTextField(PLANNED_COMPLETION, entity.getPlannedCompletionDate().toString());
+        panelComponent.updateTextField(DATE_END, dateEnd);
+        panelComponent.updateTextField(DESCRIPTION, entity.getDescription());
+    }
+
+    @Override
+    public JPanel selectEntryPanel() {
+        clearPanelBody();
+
+        List<JPanel> components = new ArrayList<>();
+        components.addAll(createIntervalPanels(DATE_START, PLANNED_COMPLETION));
+        components.addAll(createComboBoxPanels(true, SPRINT, PERFORMER, EXECUTION, PRIORITY, COMPLEXITY));
+        components.addAll(createTextFieldPanels(true, TASK));
+        addAllComponentsToPanel(components);
+
+        return panelBody;
+    }
+
+    @Override
+    protected List<Optional<SearchCriteria>> createListCriteria() {
+        List<Optional<SearchCriteria>> searchCriteria = new ArrayList<>();
+
+        searchCriteria.addAll(criteriaFromInterval(DATE_START, PLANNED_COMPLETION));
+        searchCriteria.addAll(criteriaFromComboBox(SPRINT, PERFORMER, EXECUTION, PRIORITY, COMPLEXITY));
+        searchCriteria.addAll(criteriaTextField(TASK));
+
+        return searchCriteria;
+    }
+
+    @Override
+    public ActionListener createGraph() {
+        return e -> {
+            List<AttributeName> variants = List.of(PROJECT, SPRINT, PERFORMER, EXECUTION, PRIORITY, COMPLEXITY);
+            createGraphUI(variants);
+        };
     }
 }

@@ -1,9 +1,10 @@
 package org.university.business_logic.utils.reference_book;
 
 import org.jetbrains.annotations.NotNull;
-import org.university.business_logic.utils.ObjectName;
+import org.university.business_logic.attribute_name.AttributeName;
 import org.university.business_logic.search_tools.SearchOperation;
-import org.university.business_logic.abstracts.TableModelView;
+import org.university.business_logic.abstracts.ReferenceBookModelView;
+import org.university.business_logic.attribute_name.AttributeNameSimple;
 import org.university.entities.reference_book.StateTesting;
 import org.university.business_logic.search_tools.SearchCriteria;
 import org.university.exception.CastingException;
@@ -12,11 +13,11 @@ import org.university.exception.SelectedException;
 import javax.swing.*;
 import java.util.List;
 
-public class StateTestingUtil extends TableModelView<StateTesting> {
-    private static final ObjectName STATE_TESTING = new ObjectName("Стан тестування", "nameState");
+public class StateTestingUtil extends ReferenceBookModelView<StateTesting> {
+    private static final AttributeName STATE_TESTING = new AttributeNameSimple(0, "Стан тестування", "nameState");
 
     public StateTestingUtil(){
-        titleColumns = List.of(STATE_TESTING.nameForUser());
+        titleColumns = List.of(STATE_TESTING.getNameForUser());
         nameTable = "Стани тестування";
     }
 
@@ -32,8 +33,8 @@ public class StateTestingUtil extends TableModelView<StateTesting> {
 
     @Override
     protected SearchCriteria[] criteriaToSearchEntities(@NotNull JTable table, int indexRow){
-        String value = (String)table.getValueAt(indexRow, 0);
-        return new SearchCriteria[]{ new SearchCriteria(STATE_TESTING.nameForSystem(), value, SearchOperation.EQUAL) };
+        var value = table.getValueAt(indexRow, STATE_TESTING.getId());
+        return new SearchCriteria[]{ new SearchCriteria(STATE_TESTING.getNameForSystem(), value, SearchOperation.EQUAL) };
     }
 
     @Override
@@ -42,7 +43,7 @@ public class StateTestingUtil extends TableModelView<StateTesting> {
             panelBody.removeAll();
         }
 
-        panelBody = windowComponent.createTextFieldInputPanel(STATE_TESTING);
+        panelBody = panelComponent.createTextFieldInputPanel(STATE_TESTING);
         return panelBody;
     }
 
@@ -54,7 +55,7 @@ public class StateTestingUtil extends TableModelView<StateTesting> {
     @Override
     protected SearchCriteria[] criteriaToSearchDuplicate(@NotNull StateTesting entity) {
         return new SearchCriteria[]{
-                new SearchCriteria(STATE_TESTING.nameForSystem(), entity.getNameState(), SearchOperation.EQUAL)
+                new SearchCriteria(STATE_TESTING.getNameForSystem(), entity.getNameState(), SearchOperation.EQUAL)
         };
     }
 
@@ -75,6 +76,6 @@ public class StateTestingUtil extends TableModelView<StateTesting> {
     @Override
     protected void fillingFields() throws SelectedException {
         var entity = getSelectedEntity();
-        windowComponent.updateTextField(STATE_TESTING, entity.getNameState());
+        panelComponent.updateTextField(STATE_TESTING, entity.getNameState());
     }
 }

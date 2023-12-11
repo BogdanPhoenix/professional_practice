@@ -1,240 +1,247 @@
 package org.university.business_logic.abstracts;
 
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.university.exception.*;
-import org.university.ui.additional_tools.MessageWindow;
-import org.university.business_logic.utils.ObjectName;
-import org.university.ui.additional_tools.WindowComponent;
-import org.university.entities.TableID;
-import org.university.ui.mediator.interfaces.Mediator;
+import org.university.business_logic.Interval;
 import org.university.business_logic.search_tools.SearchCriteria;
+import org.university.business_logic.search_tools.SearchOperation;
+import org.university.business_logic.attribute_name.AttributeName;
+import org.university.business_logic.attribute_name.AttributeNameSimple;
+import org.university.entities.TableID;
+import org.university.exception.SelectedException;
+import org.university.ui.additional_tools.MessageWindow;
+import org.university.ui.components.input_panel.CheckBox;
+import org.university.ui.statistic.GraphUI;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.sql.Timestamp;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
-public abstract class TableModelView<T extends TableID>
-        implements SelectModelView<T>, InsertModelView<T>, DeleteModelView<T>, UpdateModelView<T>
-{
-    protected static Mediator mediator;
+public abstract class TableModelView<T extends TableID> extends ReferenceBookModelView<T> implements SelectWithParametersModelView{
+    protected void clearPanelBody(){
+        if(panelBody != null) {
+            panelBody.removeAll();
+        }
+    }
+    protected void addAllComponentsToPanel(@NotNull List<JPanel> panels){
+        panelBody = new JPanel();
+        panelBody.setLayout(new GridLayout(panels.size(), 1));
 
-    @Getter
-    protected String nameTable;
-    protected List<String> titleColumns;
-    protected JPanel panelBody;
-    protected WindowComponent windowComponent;
+        for(var panel : panels){
+            panelBody.add(panel);
+        }
 
-    protected TableModelView(){
-        windowComponent = new WindowComponent();
+        panelBody = panelComponent.createScrollPanel(panelBody);
     }
 
-    public static void setMediator(Mediator mediator) {
-        TableModelView.mediator = mediator;
+    protected List<JPanel> createTextFieldPanels(boolean isFlag, AttributeName @NotNull ... namesPanel){
+        List<JPanel> panels = new ArrayList<>();
+
+        for(var name : namesPanel){
+            if(isFlag){
+                panels.add(panelComponent.createTextFieldInputWithFlagPanel(name));
+            }
+            else {
+                panels.add(panelComponent.createTextFieldInputPanel(name));
+            }
+        }
+
+        return panels;
+    }
+
+    protected List<JPanel> createComboBoxPanels(boolean isFlag, AttributeName @NotNull ... namesPanel){
+        List<JPanel> panels = new ArrayList<>();
+
+        for(var name : namesPanel){
+            if(isFlag){
+                panels.add(panelComponent.createComboBoxWithFlagPanel(name));
+            }
+            else {
+                panels.add(panelComponent.createComboBoxPanel(name));
+            }
+        }
+
+        return panels;
+    }
+
+    protected List<JPanel> createCoherentComboBoxPanels(AttributeName @NotNull ... namesPanel){
+        List<JPanel> panels = new ArrayList<>();
+
+        int lastIndex = namesPanel.length - 1;
+        for(int i = lastIndex; i >= 0; --i) {
+            if(i == lastIndex){
+                panels.add(panelComponent.createComboBoxPanel(namesPanel[i]));
+            }
+            else {
+                panels.add(panelComponent.createComboBoxPanel(namesPanel[i], namesPanel[i + 1]));
+            }
+        }
+
+        Collections.reverse(panels);
+        return panels;
+    }
+
+    protected List<JPanel> createIntervalPanels(AttributeName @NotNull ... namesPanel){
+        List<JPanel> panels = new ArrayList<>();
+
+        for (var name : namesPanel){
+            panels.add(panelComponent.createIntervalInputPanel(name));
+        }
+
+        return panels;
     }
 
     @Override
-    public void createViewModel(@NotNull DefaultTableModel tableModel) {
-        try{
-            createColumns(tableModel);
-
-            var values = selectAll();
-            addRows(tableModel, values);
-        } catch (SelectedException e) {
-            MessageWindow.errorMessageWindow("Помилка під час створення рядків таблиці", e.getMessage());
-        }
-    }
-
-    private void createColumns(@NotNull DefaultTableModel tableModel){
-        for (var title : titleColumns){
-            tableModel.addColumn(title);
-        }
-    }
-
-    protected void addRows(DefaultTableModel tableModel, @NotNull List<Optional<T>> list){
-        for(var info : list){
-            info.ifPresent(
-                    value -> tableModel.addRow(createAttribute(value))
-            );
-        }
-    }
-
-    protected String valueFromTextField(final @NotNull ObjectName nameComponent){
-        var component = windowComponent.getComponent(nameComponent);
-        return ((JTextField)component).getText();
-    }
-
-    protected String valueFromPasswordField(final @NotNull ObjectName nameComponent){
-        var component = windowComponent.getComponent(nameComponent);
-        var charsPassword = ((JPasswordField)component).getPassword();
-        return new String(charsPassword);
-    }
-
-    protected Object valueFromComboBox(final @NotNull ObjectName nameComponent){
-        var component = windowComponent.getComponent(nameComponent);
-        return ((JComboBox<?>)component).getSelectedItem();
-    }
-
-    @Override
-    public ActionListener commandSave() {
+    public ActionListener commandSelect() {
         return e -> {
             try{
-                checkCompletenessFields();
+                JTable table = mediator.getTable();
+                DefaultTableModel model = (DefaultTableModel) table.getModel();
+                SearchCriteria[] searchCriteria = createSearchCriteria();
+                var values = selectAll(searchCriteria);
 
-                var entity = newEntity();
-
-                isDuplicate(criteriaToSearchDuplicate(entity));
-                save(entity);
-            } catch (SelectedException ex){
-                MessageWindow.errorMessageWindow("Помилка заповненості полів", ex.getMessage());
-            } catch (DuplicateException ex){
-                MessageWindow.errorMessageWindow("Дублювання даних", ex.getMessage());
-            } catch (InsertException ex){
-                MessageWindow.errorMessageWindow("Помилка під час додання даних", ex.getMessage());
-            } catch (CastingException ex){
-                MessageWindow.errorMessageWindow("Помилка перетворення типів.", ex.getMessage());
+                model.setRowCount(0);
+                addRows(model, values);
+            } catch (RuntimeException ex) {
+                MessageWindow.errorMessageWindow("Помилка під час створення рядків таблиці", ex.getMessage());
             }
         };
     }
 
-    protected void isDuplicate(SearchCriteria... criteria) throws DuplicateException, SelectedException {
-        var selectList = selectAll(criteria);
+    protected SearchCriteria @NotNull [] createSearchCriteria(){
+        List<Optional<SearchCriteria>> searchCriteria = createListCriteria();
 
-        if(!selectList.isEmpty()){
-            throw new DuplicateException("Введені вами дані вже є присутні в таблиці. Спробуйте ввести інші дані.");
-        }
-    }
-
-    @Override
-    public ActionListener commandDelete() {
-        return e -> {
-            var entities = getEntities().stream()
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .toList();
-
-            if(entities.isEmpty()){
-                MessageWindow.errorMessageWindow("Помилка видалення", "Ви не обрали жодної сутності. Немає чого видаляти");
-                return;
-            }
-
-            if(!MessageWindow.deleteMessageWindow()){
-                return;
-            }
-
-            deleteAllEntities(entities);
-        };
-    }
-
-    private void deleteAllEntities(List<T> entities) {
-        try {
-            delete(entities);
-        } catch (RuntimeException e){
-            MessageWindow.errorMessageWindow(
-                    "Помилка під час видалення.",
-                    e.getMessage()
-            );
-        }
-    }
-
-    @NotNull
-    protected List<Optional<T>> getEntities(){
-        JTable table = mediator.getTable();
-        var selectedRows = table.getSelectedRows();
-
-        if(selectedRows.length == 0){
-            return new ArrayList<>();
-        }
-
-        return selectionAllNecessaryEntities(table, selectedRows);
-    }
-
-    private @NotNull List<Optional<T>> selectionAllNecessaryEntities(JTable table, int @NotNull [] selectedRows){
-        try{
-            List<Optional<T>> selected = new ArrayList<>();
-
-            for(var index : selectedRows){
-                SearchCriteria[] searchCriteria = criteriaToSearchEntities(table, index);
-                selected.addAll(selectAll(searchCriteria));
-            }
-
-            return selected;
-        } catch (SelectedException e){
-            MessageWindow.errorMessageWindow("Помилка вибору сутностей", e.getMessage());
-            return new ArrayList<>();
-        }
-    }
-
-    protected T getSelectedEntity() throws SelectedException {
-        return getEntities().stream()
+        return searchCriteria.stream()
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .findFirst()
-                .orElseThrow(() ->
-                        new SelectedException("Не вдалося отримати виділений об'єкт.")
-                );
+                .toArray(SearchCriteria[]::new);
     }
 
-    @Override
-    public ActionListener commandUpdate() {
-        return e -> {
-            try{
-                checkSelectedRows();
-                checkCompletenessFields();
+    protected List<Optional<SearchCriteria>> criteriaFromInterval(AttributeName @NotNull ... nameComponentSearch) {
+        List<Optional<SearchCriteria>> criteria = new ArrayList<>();
 
-                if(!MessageWindow.updateMessageWindow()){
-                    return;
-                }
+        for(var name : nameComponentSearch){
+            criteria.add(createCriteriaFromInterval(name));
+        }
 
-                var prev = getSelectedEntity();
-                var current = newEntity();
+        return criteria;
+    }
 
-                current.setId(prev.getId());
-                update(current);
-            } catch (UpdateException ex){
-                MessageWindow.errorMessageWindow("Помилка при оновленні.", ex.getMessage());
-            } catch (SelectedException ex){
-                MessageWindow.errorMessageWindow("Помилка під час оновлення", ex.getMessage());
-            } catch (CastingException ex){
-                MessageWindow.errorMessageWindow("Помилка перетворення типів.", ex.getMessage());
+    private Optional<SearchCriteria> createCriteriaFromInterval(AttributeName nameComponentSearch) {
+        try{
+            Optional<String> from = valueFromIntervalFrom(nameComponentSearch);
+            Optional<String> to = valueFromIntervalTo(nameComponentSearch);
+
+            if(from.isEmpty()){
+                return Optional.empty();
             }
-        };
-    }
+            else if(to.isEmpty()){
+                LocalDateTime localDateTime = LocalDateTime.now();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
+                String formattedDateTime = localDateTime.format(formatter);
 
-    protected void checkSelectedRows(){
-        JTable table = mediator.getTable();
-        if(table.getSelectedRows().length > 1){
-            throw new SelectedException("Не можливо оновити декілька виділених сутностей.");
+                to = Optional.of(formattedDateTime);
+            }
+
+            return Optional.of(new SearchCriteria(nameComponentSearch.getNameForSystem(), new Interval(from.get(), to.get()), SearchOperation.BETWEEN));
+        } catch (Exception e){
+            MessageWindow.errorMessageWindow("Помилка створення критерію", String.format("Під час створення критерію за атрибутом %s для вибору даних з таблиці сталася наступна помилка: %s. Даний критерій не буде враховуватися під час вибору даних.", nameComponentSearch.getNameForUser(), e.getMessage()));
+            return Optional.empty();
         }
     }
 
-    @Override
-    public ActionListener selectEntity() {
-        return e -> {
-            try {
-                checkSelectedRows();
-                fillingFields();
-            } catch (SelectedException ex){
-                MessageWindow.errorMessageWindow(
-                        "Помилка вибору сутності для редагування",
-                        ex.getMessage()
-                );
+    protected List<Optional<SearchCriteria>> criteriaFromComboBox(AttributeName... names) throws SelectedException {
+        try {
+            List<Optional<SearchCriteria>> searchCriteriaList = new ArrayList<>();
+
+            for(var name : names) {
+                Optional<Object> value = valueFromComboBoxWithFlag(name);
+                var criteria = value.map(o -> new SearchCriteria(name.getNameForSystem(), o, SearchOperation.EQUAL));
+                searchCriteriaList.add(criteria);
             }
-        };
+
+            return searchCriteriaList;
+        } catch (RuntimeException e) {
+            throw new SelectedException(e.getMessage());
+        }
     }
 
-    protected void checkCompletenessFields(final ObjectName name) throws SelectedException {
-        String nameExtension = valueFromTextField(name);
+    protected List<Optional<SearchCriteria>> criteriaTextField(AttributeName... names) throws SelectedException {
+        try {
+            List<Optional<SearchCriteria>> searchCriteriaList = new ArrayList<>();
 
-        if(nameExtension.isEmpty()){
-            throw new SelectedException(String.format(
-                    "Поле %s має бути обов'язково заповненим.",
-                    name.nameForUser()
-            ));
+            for(var name : names) {
+                Optional<String> value = valueFromTextFieldWithFlag(name);
+                var criteria = value.map(o -> new SearchCriteria(name.getNameForSystem(), o, SearchOperation.LIKE));
+                searchCriteriaList.add(criteria);
+            }
+
+            return searchCriteriaList;
+        } catch (RuntimeException e) {
+            throw new SelectedException(e.getMessage());
+        }
+    }
+
+    protected Optional<String> valueFromIntervalFrom(final @NotNull AttributeName nameComponent) throws SelectedException, IllegalStateException{
+        return valueFromInterval(nameComponent, "From");
+    }
+
+    protected Optional<String> valueFromIntervalTo(final @NotNull AttributeName nameComponent) throws SelectedException, IllegalStateException{
+        return valueFromInterval(nameComponent, "To");
+    }
+
+    private Optional<String> valueFromInterval(AttributeName nameComponent, String partOf){
+        if(isIgnoreComponent(nameComponent)){
+            return Optional.empty();
+        }
+        AttributeName nameTo = new AttributeNameSimple(0, nameComponent.getNameForUser(), nameComponent.getNameForSystem() + partOf);
+        String value = valueFromTextField(nameTo);
+
+        if(value.isEmpty()){
+            return Optional.empty();
+        }
+        else {
+            return Optional.of(value);
+        }
+    }
+
+    protected Optional<String> valueFromTextFieldWithFlag(final @NotNull AttributeName nameComponent) throws SelectedException, IllegalStateException {
+        if(isIgnoreComponent(nameComponent)){
+            return Optional.empty();
+        }
+        String value = valueFromTextField(nameComponent);
+        return Optional.of(value);
+    }
+
+    protected Optional<Object> valueFromComboBoxWithFlag(final @NotNull AttributeName nameComponent) throws SelectedException {
+        if(isIgnoreComponent(nameComponent)){
+            return Optional.empty();
+        }
+        var value = valueFromComboBox(nameComponent);
+        return Optional.of(value);
+    }
+
+    private boolean isIgnoreComponent(final @NotNull AttributeName nameComponent) {
+        AttributeName nameCheck = new AttributeNameSimple(0, "", nameComponent.getNameForSystem() + "Flag");
+        CheckBox checkBox = (CheckBox) panelComponent.getComponent(nameCheck);
+
+        return !checkBox.isSelected();
+    }
+
+    protected Object valueFromComboBox(final @NotNull AttributeName nameComponent){
+        try{
+            var component = panelComponent.getComponent(nameComponent);
+            return ((JComboBox<?>)component).getSelectedItem();
+        }  catch (Exception e) {
+            throw new SelectedException(String.format("Не вдалося отримати значення з полю %s. Спробуйте іще раз.", nameComponent.getNameForUser()));
         }
     }
 
@@ -250,10 +257,10 @@ public abstract class TableModelView<T extends TableID>
                 : timestamp.toString();
     }
 
-    protected abstract Object[] createAttribute(T value);
-    protected abstract SearchCriteria[] criteriaToSearchEntities(JTable table, int indexRow);
-    protected abstract SearchCriteria[] criteriaToSearchDuplicate(T entity);
-    protected abstract T newEntity() throws CastingException;
-    protected abstract void checkCompletenessFields() throws SelectedException;
-    protected abstract void fillingFields() throws SelectedException;
+    protected void createGraphUI(List<AttributeName> variants){
+        GraphUI graphUI = GraphUI.getInstance(variants, mediator.getTable());
+        graphUI.setVisible(true);
+    }
+
+    protected abstract List<Optional<SearchCriteria>> createListCriteria();
 }
